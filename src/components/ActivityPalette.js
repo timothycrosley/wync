@@ -14,23 +14,19 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
   // Ref to prevent click after long press opens picker
   const didLongPressRef = useRef(false); 
 
-  const [pendingColor, setPendingColor] = useState(null); // State for picker's temp color
-
   const handleRemoveClick = (e, activityId) => {
     e.stopPropagation(); // Prevent selecting the activity when clicking remove
     clearTimeout(longPressTimerRef.current); // Cancel long press if remove is clicked
     setPickerActivityId(null); // Close picker if open
-    setPendingColor(null); // Clear pending color on remove
     onRemoveActivity(activityId);
   };
 
   // --- Long Press Handlers --- 
-  const handleMouseDown = useCallback((activityId, currentColor) => {
+  const handleMouseDown = useCallback((activityId) => {
     didLongPressRef.current = false; // Reset flag
     clearTimeout(longPressTimerRef.current); // Clear any existing timer
     longPressTimerRef.current = setTimeout(() => {
       didLongPressRef.current = true; // Set flag: long press occurred
-      setPendingColor(currentColor); // Initialize pending color with current color
       setPickerActivityId(activityId); // Open the picker for this activity
     }, 500); // 500ms delay for long press
   }, []);
@@ -45,7 +41,6 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
     // Otherwise (it was a short click), select the activity.
     if (!didLongPressRef.current) {
       setPickerActivityId(null); // Ensure picker is closed on short click
-      setPendingColor(null); // Clear pending color
       onSelectActivity(activityId);
     }
     // Don't reset didLongPressRef here, let mouseDown handle it
@@ -60,23 +55,18 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
   // --- End Long Press Handlers ---
 
   // Handler for color picker changes
-  const handleColorChange = useCallback((color) => {
-    setPendingColor(color.hex);
-  }, []);
+  const handleColorChangeComplete = useCallback((color, activityId) => {
+    onUpdateActivityColor(activityId, color.hex); // Update color directly
+  }, [onUpdateActivityColor]);
 
-  // Handler to close the picker
-  const handlePickerClose = useCallback(() => {
-     setPickerActivityId(null);
-     setPendingColor(null);
+  // Handler to close the picker, checks if click was directly on the cover
+  const handlePickerClose = useCallback((e) => {
+     // Only close if the click event originated directly on the cover element
+     if (e.target === e.currentTarget) {
+        setPickerActivityId(null);
+     }
+     // Otherwise, do nothing (click was likely inside the picker popover)
   }, []);
-
-  // Accept the pending color
-  const handleAcceptColor = useCallback(() => {
-    if (pickerActivityId && pendingColor) {
-        onUpdateActivityColor(pickerActivityId, pendingColor);
-    }
-    handlePickerClose(); // Close picker after accepting
-  }, [pickerActivityId, pendingColor, onUpdateActivityColor, handlePickerClose]);
 
   return (
     <div className="activity-palette">
@@ -93,18 +83,17 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
       {displayActivities.map(activity => (
         <div 
           key={activity.id} 
-          className="activity-item-wrapper" // Added wrapper for positioning picker
+          className="activity-item-wrapper"
         >
+          {/* Activity Item itself */}
           <div
             className={`activity-item ${selectedActivityId === activity.id ? 'selected' : ''}`}
-            // Long press detection handlers
-            onMouseDown={() => handleMouseDown(activity.id, activity.color)} // Pass current color
+            onMouseDown={() => handleMouseDown(activity.id)}
             onMouseUp={() => handleMouseUp(activity.id)}
             onMouseLeave={handleMouseLeave} 
-            // Double-click still works for random color
             onDoubleClick={() => onUpdateActivityColor(activity.id)} 
             style={{ backgroundColor: activity.color }}
-            title={`${activity.name} (Click=Select, DblClick=Random Color, LongPress=Choose Color)`} // Updated title
+            title={`${activity.name} (Click=Select, DblClick=Random Color, LongPress=Choose Color)`}
           >
             <span className="activity-name">{activity.name}</span>
             <button 
@@ -115,19 +104,28 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
               ×
             </button>
           </div>
-          {/* Conditionally render color picker */} 
+           
+          {/* Conditionally render Cover and Popover as siblings */} 
           {pickerActivityId === activity.id && (
-             <div className="color-picker-popover"> 
-               <div className="color-picker-cover" onClick={handlePickerClose}/>
-               <SketchPicker 
-                 color={pendingColor || activity.color} // Show pending color, fallback to activity color
-                 onChange={(color) => handleColorChange(color)} // Update pending color on change
-                 presetColors={[] /* Optionally hide preset colors */} 
-               />
-               <button onClick={handleAcceptColor} className="color-picker-accept-button">
-                 Accept
-               </button>
-             </div>
+            <>
+              {/* Cover is rendered first, positioned behind by CSS z-index */}
+              <div className="color-picker-cover" onClick={handlePickerClose}/>
+              
+              {/* Popover is rendered second, positioned above by CSS z-index */}
+              {/* No stopPropagation needed here now */}
+              <div className="color-picker-popover"> 
+                {/* Pass the event object to handlePickerClose here too */} 
+                <button onClick={handlePickerClose} className="color-picker-close-button">×</button> 
+                {/* Add a wrapper around SketchPicker with stopPropagation */}
+                <div onClick={(e) => e.stopPropagation()}> 
+                  <SketchPicker 
+                    color={activity.color} 
+                    onChangeComplete={(color) => handleColorChangeComplete(color, activity.id)} 
+                    presetColors={[]} 
+                  />
+                </div>
+              </div>
+            </>
           )}
         </div>
       ))}

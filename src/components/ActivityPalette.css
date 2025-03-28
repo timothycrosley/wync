@@ -64,3 +64,63 @@
     margin-top: 15px;
     text-align: center;
 }
+
+/* Wrapper to contain the absolutely positioned picker */
+.activity-item-wrapper {
+  position: relative; /* Establishes a positioning context for the popover */
+  margin-bottom: 5px; /* Keep some spacing between wrapper elements */
+}
+
+/* Styles for the popover containing the picker and buttons */
+.color-picker-popover {
+  position: absolute; 
+  z-index: 10; /* Ensures the popover is above other palette items */
+  /* Position it relative to the wrapper (e.g., below or to the side) */
+  top: 100%; /* Position below the activity item */
+  left: 0; 
+  margin-top: 5px; /* Add a small gap */
+}
+
+/* Styles for the full-screen cover to catch outside clicks */
+.color-picker-cover {
+  position: fixed; /* Position relative to the viewport */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9; /* Below the popover (10) but above everything else */
+  /* background-color: rgba(0, 0, 0, 0.1); /* Optional: Slight dimming effect */
+}
+
+/* Styles for the close button on the picker */
+.color-picker-close-button {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 11; /* Above the picker itself */
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 12px;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  text-align: center;
+}
+
+.color-picker-close-button:hover {
+  background: white;
+}
+
+/* Adjustments to existing activity-item if needed (e.g., if padding/margin interfere) */
+.activity-item {
+  /* ... existing styles ... */
+  /* Ensure it doesn't have position: relative itself unless intended */
+}
+
+/* Ensure the empty item doesn't get a wrapper or picker */
+.empty-item {
+  /* If it was wrapped, specific styles might be needed, but it shouldn't be based on the JS */
+}
