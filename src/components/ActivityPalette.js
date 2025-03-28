@@ -2,6 +2,29 @@ import React, { useState, useRef, useCallback } from 'react';
 import { SketchPicker } from 'react-color'; // Import the color picker
 import './ActivityPalette.css'; // We'll create this CSS file next
 
+// Helper function copied from TimeSlotCell.js
+const getTextColor = (bgColor) => {
+  // Basic check for invalid color
+  if (!bgColor || typeof bgColor !== 'string') return '#333'; 
+  
+  // Handle white/transparent case specifically for palette
+  if (bgColor === '#FFFFFF') return '#333'; 
+
+  const color = bgColor.substring(1); // strip #
+  try {
+    const rgb = parseInt(color, 16);   // convert rrggbb to decimal
+    const r = (rgb >> 16) & 0xff;  // extract red
+    const g = (rgb >>  8) & 0xff;  // extract green
+    const b = (rgb >>  0) & 0xff;  // extract blue
+    // Calculate luminance (per WCAG standard)
+    const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luma < 140 ? 'white' : '#333'; // Use white text on dark backgrounds
+  } catch (e) {
+    console.error("Error parsing color:", bgColor, e);
+    return '#333'; // Default color on error
+  }
+};
+
 function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onRemoveActivity, onUpdateActivityColor }) {
   // Filter out the 'Empty' activity from the visible palette
   const displayActivities = activities.filter(a => a.id !== 'empty');
@@ -76,59 +99,68 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
         key="empty"
         className={`activity-item empty-item ${selectedActivityId === 'empty' ? 'selected' : ''}`}
         onClick={() => onSelectActivity('empty')}
+        style={{ color: '#333' }}
       >
         Clear Cell
       </div>
       {/* Display other activities with remove buttons */}
-      {displayActivities.map(activity => (
-        <div 
-          key={activity.id} 
-          className="activity-item-wrapper"
-        >
-          {/* Activity Item itself */}
-          <div
-            className={`activity-item ${selectedActivityId === activity.id ? 'selected' : ''}`}
-            onMouseDown={() => handleMouseDown(activity.id)}
-            onMouseUp={() => handleMouseUp(activity.id)}
-            onMouseLeave={handleMouseLeave} 
-            onDoubleClick={() => onUpdateActivityColor(activity.id)} 
-            style={{ backgroundColor: activity.color }}
-            title={`${activity.name} (Click=Select, DblClick=Random Color, LongPress=Choose Color)`}
+      {displayActivities.map(activity => {
+        // Calculate text color for this activity
+        const textColor = getTextColor(activity.color);
+
+        return (
+          <div 
+            key={activity.id} 
+            className="activity-item-wrapper"
           >
-            <span className="activity-name">{activity.name}</span>
-            <button 
-              onClick={(e) => handleRemoveClick(e, activity.id)} 
-              className="remove-button activity-remove-button" 
-              title="Remove Activity"
+            {/* Activity Item itself */}
+            <div
+              className={`activity-item ${selectedActivityId === activity.id ? 'selected' : ''}`}
+              onMouseDown={() => handleMouseDown(activity.id)}
+              onMouseUp={() => handleMouseUp(activity.id)}
+              onMouseLeave={handleMouseLeave} 
+              onDoubleClick={() => onUpdateActivityColor(activity.id)} 
+              style={{ 
+                backgroundColor: activity.color, 
+                color: textColor
+              }}
+              title={`${activity.name} (Click=Select, DblClick=Random Color, LongPress=Choose Color)`}
             >
-              ×
-            </button>
-          </div>
+              <span className="activity-name">{activity.name}</span>
+              <button 
+                onClick={(e) => handleRemoveClick(e, activity.id)} 
+                className="remove-button activity-remove-button" 
+                title="Remove Activity"
+              >
+                ×
+              </button>
+            </div>
            
-          {/* Conditionally render Cover and Popover as siblings */} 
-          {pickerActivityId === activity.id && (
-            <>
-              {/* Cover is rendered first, positioned behind by CSS z-index */}
-              <div className="color-picker-cover" onClick={handlePickerClose}/>
-              
-              {/* Popover is rendered second, positioned above by CSS z-index */}
-              {/* No stopPropagation needed here now */}
-              <div className="color-picker-popover"> 
-                {/* Pass the event object to handlePickerClose here too */} 
-                <button onClick={handlePickerClose} className="color-picker-close-button">×</button> 
-                {/* Add a wrapper around SketchPicker with stopPropagation */}
-                <div onClick={(e) => e.stopPropagation()}> 
-                  <SketchPicker 
-                    color={activity.color} 
-                    onChangeComplete={(color) => handleColorChangeComplete(color, activity.id)} 
-                    presetColors={[]} 
-                  />
+            {/* Conditionally render Cover and Popover as siblings */} 
+            {pickerActivityId === activity.id && (
+              <>
+                {/* Cover is rendered first, positioned behind by CSS z-index */}
+                <div className="color-picker-cover" onClick={handlePickerClose}/>
+                
+                {/* Popover is rendered second, positioned above by CSS z-index */}
+                {/* No stopPropagation needed here now */}
+                <div className="color-picker-popover"> 
+                  {/* Pass the event object to handlePickerClose here too */} 
+                  <button onClick={handlePickerClose} className="color-picker-close-button">×</button> 
+                  {/* Add a wrapper around SketchPicker with stopPropagation */}
+                  <div onClick={(e) => e.stopPropagation()}> 
+                    <SketchPicker 
+                      color={activity.color} 
+                      onChangeComplete={(color) => handleColorChangeComplete(color, activity.id)} 
+                      presetColors={[]} 
+                    />
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
-        </div>
-      ))}
+              </>
+            )}
+          </div>
+        )
+      })}
       <p className="palette-instructions">Click=Select. DblClick=Random Color. Long Press=Choose Color.</p> {/* Updated instructions */}
     </div>
   );
