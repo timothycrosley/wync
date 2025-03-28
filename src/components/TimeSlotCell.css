@@ -1,0 +1,54 @@
+.time-slot-cell {
+  height: 31px; /* Fixed height - MUST match .time-slot-label */
+  border-bottom: 1px solid #eee;
+  /* Add a subtle left border for visual separation between people */
+  border-left: 1px solid #eee;
+  cursor: pointer;
+  /* Don't transition background color here, as hover handles preview */
+  /* transition: background-color 0.1s ease-in-out; */
+  background-size: cover;
+  background-position: center;
+  /* Add styles for text display */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px; /* Small padding */
+  text-align: center;
+  overflow: hidden; /* Prevent text overflow */
+}
+
+/* Remove left border from the very first column of cells (time labels don't need it) */
+.schedule-grid > .person-column:first-of-type .time-slot-cell {
+    border-left: none;
+}
+
+/* Remove bottom border from last cell in a column */
+.person-column .time-slot-cell:last-child {
+  border-bottom: none;
+}
+
+.time-slot-cell.empty-cell {
+   background-color: #ffffff;
+   border-top: 1px solid #f8f8f8;
+}
+
+.time-slot-cell:hover {
+     /* Use the CSS variable passed from the component for hover preview */
+     background-color: var(--selected-activity-color, #ffffff) !important; /* Use fallback just in case */
+     outline: 1px solid rgba(0, 0, 0, 0.4); /* Slightly stronger outline */
+     z-index: 1;
+}
+
+.cell-activity-name {
+    font-size: 0.75em; /* Smaller font size */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis if text too long */
+    max-width: 100%;
+    pointer-events: none; /* Make the text span ignore mouse events */
+}
+
+.time-slot-cell.empty-cell .cell-activity-name {
+    /* Optionally style text differently for empty cells if needed */
+    color: #ccc; /* Lighter text for placeholder or empty */
+}

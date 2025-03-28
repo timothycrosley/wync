@@ -1,0 +1,75 @@
+.person-column {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ccc;
+  min-width: 150px; /* Minimum width for a person column */
+}
+
+/* Remove border from last person column */
+.person-column:last-child {
+  border-right: none;
+}
+
+.person-header-cell {
+    /* Uses .header-cell styles from ScheduleGrid.css */
+    /* Add specific overrides if needed */
+    min-height: 40px;
+    display: flex; /* Use flexbox to position name and button */
+    align-items: center;
+    justify-content: space-between; /* Push name and button apart */
+    padding-left: 10px; /* Keep padding consistent */
+    padding-right: 5px; /* Reduce right padding slightly for button */
+}
+
+.person-name {
+    flex-grow: 1; /* Allow name to take up space */
+    text-align: left; /* Align name left */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.person-remove-button {
+    /* Inherits .remove-button styles */
+    margin-left: 5px; /* Space between name and button */
+}
+
+.activity-summary {
+    min-height: 100px; /* Match summary-space height in ScheduleGrid.css */
+    border-bottom: 1px solid #ccc;
+    padding: 8px;
+    font-size: 0.8em;
+    background-color: #f1f3f5; /* Match summary-space background */
+    overflow-y: auto; /* Allow scrolling if many activities */
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.summary-color {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+.summary-name {
+    flex-grow: 1;
+    white-space: nowrap;
+}
+
+.summary-hours {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.unassigned-summary {
+    color: #555;
+}

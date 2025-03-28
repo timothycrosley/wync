@@ -1,38 +1,120 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #f0f0f0; /* Light grey background */
+}
+
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center; /* Center content horizontally */
+  padding: 20px;
 }
 
-.App-link {
-  color: #61dafb;
+.App h1 {
+    color: #333;
+    margin-bottom: 20px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.controls {
+    display: flex;
+    gap: 20px; /* Space between forms */
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #fff; /* White background for controls area */
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.controls form {
+    display: flex;
+    gap: 10px;
+}
+
+.controls input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.controls button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 1em; /* Ensure consistent font size */
+}
+
+.controls button:hover {
+    background-color: #0056b3;
+}
+
+/* Clear All Button Specific Style */
+.controls .clear-button {
+    background-color: #dc3545; /* Red for destructive action */
+}
+
+.controls .clear-button:hover {
+    background-color: #c82333;
+}
+
+/* Generic Remove Button Style */
+.remove-button {
+    background-color: transparent;
+    border: none;
+    color: #dc3545; /* Red color */
+    cursor: pointer;
+    font-size: 1.2em; /* Make X slightly larger */
+    font-weight: bold;
+    padding: 0 5px; /* Minimal padding */
+    line-height: 1; /* Adjust line height */
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.remove-button:hover {
+    opacity: 1;
+}
+
+.layout-container { /* Renamed from .main-content */
+    display: flex;
+    width: 95%;
+    max-width: 1400px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden; /* Keep this to contain children */
+    /* Set a max height relative to viewport for scrolling */
+    max-height: calc(100vh - 150px); /* Adjust 150px based on header/controls height */
+}
+
+/* Style the palette (defined in ActivityPalette.css) within this container */
+.layout-container > .activity-palette {
+    position: sticky;
+    top: 0;
+    /* Ensure it stays above scrolling content */
+    z-index: 10; 
+    /* Prevent palette itself from scrolling vertically */
+    overflow-y: auto; 
+    height: calc(100vh - 150px); /* Match container height */
+    /* Adjust width as needed */
+    min-width: 180px; 
+    flex-shrink: 0; /* Prevent palette from shrinking */
+}
+
+/* Style the grid container (defined in ScheduleGrid.css) for scrolling */
+.layout-container > .schedule-grid-container {
+    flex-grow: 1;
+    /* Enable both vertical and horizontal scrolling for the grid */
+    overflow: auto; 
+    padding: 0; /* Remove padding if handled by inner elements */
+}
+
+/* Remove the old App-header, App-logo etc. if they are still there */
+.App-header, .App-logo, .App-link {
+    display: none;
 }

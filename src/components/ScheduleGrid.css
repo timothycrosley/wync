@@ -1,0 +1,63 @@
+.schedule-grid-container {
+  flex-grow: 1; /* Allow grid to take remaining space */
+  /* overflow-x: auto; */ /* Allow horizontal scrolling if needed */
+  /* padding: 15px; */ /* Padding moved or handled differently */
+  /* Ensure it takes full height within the flex container */
+  /* height: 100%; */ /* Remove height */
+}
+
+.schedule-grid {
+  display: inline-flex; /* Change to inline-flex */
+  min-width: max-content; /* Ensure it's wide enough for all columns */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  /* Ensure it takes full height within the scrolling container */
+  /* height: 100%; */ /* Remove height */
+}
+
+.time-slots-column {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ccc;
+  background-color: #f8f9fa; /* Light background for time labels */
+}
+
+.header-cell {
+  padding: 10px;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  background-color: #e9ecef; /* Slightly darker header */
+  min-height: 40px; /* Match person header height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-header-cell {
+   min-width: 60px; /* Fixed width for time labels */
+}
+
+.summary-space {
+    min-height: 100px; /* Adjust as needed based on summary content */
+    border-bottom: 1px solid #ccc;
+    background-color: #f1f3f5; /* Slightly different background for summary area */
+}
+
+.time-slot-label {
+  padding: 0 8px; /* Adjust padding */
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9em;
+  color: #555;
+  height: 31px; /* Fixed height (adjust if needed, must match TimeSlotCell) */
+  line-height: 30px; /* Vertically center text */
+  white-space: nowrap;
+  /* Removed flex centering as line-height handles it with fixed height */
+}
+
+/* Remove bottom border from last time slot label */
+.time-slots-column .time-slot-label:last-child {
+  border-bottom: none;
+}

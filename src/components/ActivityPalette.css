@@ -1,0 +1,66 @@
+.activity-palette {
+  padding: 15px;
+  border-left: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #f9f9f9;
+  min-width: 150px; /* Ensure it has some width */
+}
+
+.activity-palette h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+.activity-item {
+  padding: 8px 10px; /* Adjust padding slightly */
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.1s ease-in-out, border-color 0.1s ease-in-out;
+  color: #333;
+  font-weight: 500;
+  display: flex; /* Use flexbox */
+  justify-content: space-between; /* Space name and button */
+  align-items: center;
+}
+
+/* Add contrast for light background colors */
+.activity-item[style*="background-color: #FFFFFF"],
+.activity-item[style*="background-color: #ffffff"] {
+    border: 1px solid #ccc;
+}
+
+.activity-item:hover {
+  transform: scale(1.05);
+}
+
+.activity-item.selected {
+  border: 2px solid #007bff; /* Highlight selected activity */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.activity-name {
+    flex-grow: 1; /* Allow name to take space */
+    text-align: left; /* Align name text left */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-right: 5px; /* Space before button */
+}
+
+.activity-remove-button {
+    /* Inherits .remove-button styles */
+    /* Add specific overrides if needed */
+    flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+.palette-instructions {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 15px;
+    text-align: center;
+}
