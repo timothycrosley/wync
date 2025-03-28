@@ -54,11 +54,11 @@ function App() {
   // Global mouse listeners effect
   useEffect(() => {
     const handleGlobalMouseDown = () => {
-      console.log("Mouse Down on WINDOW - Setting ref to true"); // --- DEBUG LOG --- 
+      console.log("GLOBAL MOUSE DOWN - Setting ref to true"); // --- DEBUG LOG --- 
       isMouseDownRef.current = true;
     };
     const handleGlobalMouseUp = () => {
-      console.log("Mouse Up on WINDOW - Setting ref to false"); // --- DEBUG LOG --- 
+      console.log("GLOBAL MOUSE UP - Setting ref to false"); // --- DEBUG LOG --- 
       isMouseDownRef.current = false;
     };
 
@@ -201,31 +201,53 @@ function App() {
       }
   };
 
-  const updateCell = (personId, timeSlot, checkMouseDown = false) => {
+  // Handler to update an activity's color (accepts optional newColor)
+  const updateActivityColor = useCallback((activityIdToUpdate, newColor = null) => {
+    // Don't update the 'empty' activity color
+    if (activityIdToUpdate === 'empty') return;
+
+    // Use provided color or generate a random one
+    const finalColor = newColor || getRandomColor(); 
+
+    setActivities(prevActivities => 
+      prevActivities.map(activity => 
+        activity.id === activityIdToUpdate 
+          ? { ...activity, color: finalColor } // Use finalColor
+          : activity
+      )
+    );
+  }, []); // No dependencies needed as setActivities is stable
+
+  const updateCell = useCallback((personId, timeSlot, checkMouseDown = false) => {
+    console.log(`   updateCell (${personId}, ${timeSlot}): checkMouseDown=${checkMouseDown}, isMouseDownRef.current=${isMouseDownRef.current}`); 
     if (checkMouseDown && !isMouseDownRef.current) {
         console.log(`   Update blocked for (${personId}, ${timeSlot}) - ref is false`);
         return;
     }
-    setSchedule(prevSchedule => {
-      if (prevSchedule[personId]?.[timeSlot] === selectedActivityId) {
-        return prevSchedule;
-      }
-      console.log(`   Updating schedule for (${personId}, ${timeSlot})`);
-      const newSchedule = {
-        ...prevSchedule,
-        [personId]: {
-          ...(prevSchedule[personId] || {}),
-          [timeSlot]: selectedActivityId,
-        },
-      };
-      return newSchedule;
-    });
-  };
+    // Defer the state update slightly to prevent interfering with mouseup event detection
+    setTimeout(() => {
+      setSchedule(prevSchedule => {
+        // Check if the cell already has the target activity (important inside timeout)
+        if (prevSchedule[personId]?.[timeSlot] === selectedActivityId) {
+          return prevSchedule;
+        }
+        console.log(`   Updating schedule for (${personId}, ${timeSlot}) [via setTimeout]`);
+        const newSchedule = {
+          ...prevSchedule,
+          [personId]: {
+            ...(prevSchedule[personId] || {}),
+            [timeSlot]: selectedActivityId,
+          },
+        };
+        return newSchedule;
+      });
+    }, 0); // Timeout of 0 ms defers execution until after current event loop cycle
+  }, [selectedActivityId, isMouseDownRef]);
 
-  const handleCellEnter = (personId, timeSlot) => {
+  const handleCellEnter = useCallback((personId, timeSlot) => {
       console.log(`   Cell Entered (${personId}, ${timeSlot}) - calling updateCell with check`);
       updateCell(personId, timeSlot, true);
-  };
+  }, [updateCell]);
 
   const getSelectedActivityColor = () => {
       const activity = activities.find(a => a.id === selectedActivityId);
@@ -246,6 +268,7 @@ function App() {
               selectedActivityId={selectedActivityId}
               onSelectActivity={setSelectedActivityId}
               onRemoveActivity={removeActivity}
+              onUpdateActivityColor={updateActivityColor}
           />
           <ScheduleGrid
               people={people}

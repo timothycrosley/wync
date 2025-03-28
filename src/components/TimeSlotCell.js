@@ -31,8 +31,8 @@ function TimeSlotCell({
   const handleCellMouseDown = useCallback(() => {
     // Directly update this cell when clicked.
     // The global listener in App.js handles setting the isMouseDownRef for drag purposes.
-    onUpdate(personId, timeSlot);
-  }, [onUpdate, personId, timeSlot]);
+    onUpdate(personId, timeSlot); 
+  }, [onUpdate, personId, timeSlot]); // Reverted dependencies
 
   const cellStyle = {
     // Base background is the assigned activity color (or white for empty)
@@ -69,7 +69,7 @@ function TimeSlotCell({
         '--selected-activity-color': selectedActivityColor,
         color: textColor // Set text color dynamically
        }}
-      onMouseDown={handleCellMouseDown} // ADDED back for single click
+      onMouseDown={handleCellMouseDown} // Keeping handler, reverted logic
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       title={`${activity ? activity.name : 'Empty'} at ${timeSlot}`}
