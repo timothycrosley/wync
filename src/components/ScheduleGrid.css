@@ -1,19 +1,16 @@
 .schedule-grid-container {
   flex-grow: 1; /* Allow grid to take remaining space */
-  /* overflow-x: auto; */ /* Allow horizontal scrolling if needed */
-  /* padding: 15px; */ /* Padding moved or handled differently */
-  /* Ensure it takes full height within the flex container */
-  /* height: 100%; */ /* Remove height */
+  overflow: auto; /* Enable both vertical and horizontal scrolling */
+  height: 100%; /* Take full height of parent container */
 }
 
 .schedule-grid {
-  display: inline-flex; /* Change to inline-flex */
+  display: inline-flex; /* Keep inline-flex */
   min-width: max-content; /* Ensure it's wide enough for all columns */
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #fff;
-  /* Ensure it takes full height within the scrolling container */
-  /* height: 100%; */ /* Remove height */
+  height: auto; /* Auto height based on content */
 }
 
 .time-slots-column {

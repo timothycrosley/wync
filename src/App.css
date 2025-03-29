@@ -2,13 +2,16 @@ body {
     margin: 0;
     font-family: sans-serif;
     background-color: #f0f0f0; /* Light grey background */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .App {
   display: flex;
   flex-direction: column;
   align-items: center; /* Center content horizontally */
-  padding: 20px;
+  padding: 15px; /* Reduced padding */
+  height: 100vh; /* Use full viewport height */
+  box-sizing: border-box; /* Include padding in height calculation */
 }
 
 .App h1 {
@@ -89,21 +92,16 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     overflow: hidden; /* Keep this to contain children */
     /* Set a max height relative to viewport for scrolling */
-    max-height: calc(100vh - 150px); /* Adjust 150px based on header/controls height */
+    height: calc(100vh - 150px); /* Changed from max-height to height */
+    min-height: 400px; /* Set minimum height */
 }
 
 /* Style the palette (defined in ActivityPalette.css) within this container */
 .layout-container > .activity-palette {
-    position: sticky;
-    top: 0;
-    /* Ensure it stays above scrolling content */
-    z-index: 10; 
-    /* Prevent palette itself from scrolling vertically */
-    overflow-y: auto; 
-    height: calc(100vh - 150px); /* Match container height */
-    /* Adjust width as needed */
-    min-width: 180px; 
     flex-shrink: 0; /* Prevent palette from shrinking */
+    /* Let the component handle its own height and overflow */
+    min-width: 180px;
+    border-right: 1px solid #ccc;
 }
 
 /* Style the grid container (defined in ScheduleGrid.css) for scrolling */
