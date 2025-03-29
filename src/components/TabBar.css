@@ -161,6 +161,24 @@
   background-color: #c82333;
 }
 
+.tab-action-button.export-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.tab-action-button.export-button:hover {
+  background-color: #218838;
+}
+
+.tab-action-button.import-button {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.tab-action-button.import-button:hover {
+  background-color: #138496;
+}
+
 .add-tab-button {
   background: none;
   border: none;

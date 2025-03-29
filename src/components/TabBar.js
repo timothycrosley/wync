@@ -11,7 +11,9 @@ function TabBar({
   onClearTab,
   onDuplicateTab,
   onReorderTabs,
-  onClearAllData
+  onClearAllData,
+  onExport,
+  onImport
 }) {
   const [editingTabId, setEditingTabId] = useState(null);
   const [newTabName, setNewTabName] = useState('');
@@ -184,6 +186,12 @@ function TabBar({
         </button>
         <button className="tab-action-button" onClick={onDuplicateTab} title="Duplicate current tab">
           Duplicate Tab
+        </button>
+        <button className="tab-action-button export-button" onClick={onExport} title="Export all schedules to JSON file">
+          Export
+        </button>
+        <button className="tab-action-button import-button" onClick={onImport} title="Import schedules from JSON file">
+          Import
         </button>
         <button className="tab-action-button clear-all-button" onClick={onClearAllData} title="Clear all data including people, activities, and tabs">
           Clear All

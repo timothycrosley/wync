@@ -582,8 +582,102 @@ function App() {
     setTabs(newTabsOrder);
   }, []);
 
+  // Export all data to a JSON file
+  const exportData = useCallback(() => {
+    // Create a JSON object with all the application data
+    const exportData = {
+      people,
+      activities: activities.filter(a => a.id !== 'empty'), // Don't export the empty activity
+      tabs,
+      schedules,
+      activeTabId
+    };
+
+    // Convert to a JSON string
+    const jsonString = JSON.stringify(exportData, null, 2);
+    
+    // Create a blob with the data
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Create a link element and trigger download
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `schedule_export_${new Date().toISOString().split('T')[0]}.json`;
+    
+    // Append to the document, click to download, then remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [people, activities, tabs, schedules, activeTabId]);
+
+  // Import data from a JSON file
+  const importData = useCallback((event) => {
+    const fileReader = new FileReader();
+    
+    fileReader.onload = (e) => {
+      try {
+        // Parse the JSON data
+        const importedData = JSON.parse(e.target.result);
+        
+        // Validate the imported data has required structures
+        if (!importedData.people || !importedData.activities || 
+            !importedData.tabs || !importedData.schedules) {
+          alert("Invalid schedule file format!");
+          return;
+        }
+        
+        // Confirm before overwriting
+        if (window.confirm("This will replace all your current data. Are you sure you want to continue?")) {
+          // Update all application state with imported data
+          setPeople(importedData.people);
+          
+          // Ensure we have the empty activity
+          const emptyActivity = activities.find(a => a.id === 'empty');
+          setActivities([emptyActivity, ...importedData.activities]);
+          
+          setTabs(importedData.tabs);
+          setSchedules(importedData.schedules);
+          
+          // Set active tab id if valid, otherwise use the first tab
+          if (importedData.activeTabId && importedData.tabs.some(tab => tab.id === importedData.activeTabId)) {
+            setActiveTabId(importedData.activeTabId);
+          } else if (importedData.tabs.length > 0) {
+            setActiveTabId(importedData.tabs[0].id);
+          }
+          
+          // Clear selected activity
+          setSelectedActivityId('empty');
+        }
+      } catch (error) {
+        console.error("Error importing data:", error);
+        alert("Error importing data: " + error.message);
+      }
+    };
+    
+    if (event.target.files[0]) {
+      fileReader.readAsText(event.target.files[0]);
+    }
+    
+    // Reset the file input so the same file can be loaded again if needed
+    event.target.value = '';
+  }, [activities]);
+
+  // Handle file input click for import
+  const handleImportClick = useCallback(() => {
+    document.getElementById('file-import').click();
+  }, []);
+
   return (
     <div className="App">
+      {/* Hidden file input for importing */}
+      <input 
+        type="file" 
+        id="file-import" 
+        accept=".json" 
+        style={{ display: 'none' }} 
+        onChange={importData}
+      />
+      
       <div className="layout-container">
           <ActivityPalette
               activities={activities}
@@ -627,6 +721,8 @@ function App() {
         onDuplicateTab={duplicateTab}
         onReorderTabs={handleReorderTabs}
         onClearAllData={clearAllData}
+        onExport={exportData}
+        onImport={handleImportClick}
       />
     </div>
   );
