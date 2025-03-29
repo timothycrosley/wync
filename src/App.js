@@ -5,6 +5,7 @@ import ActivityPalette from './components/ActivityPalette';
 import AddPersonForm from './components/AddPersonForm';
 import AddActivityForm from './components/AddActivityForm';
 import TabBar from './components/TabBar';
+import TabContent from './components/TabContent';
 import { generateTimeSlots } from './utils/timeUtils'; // We'll create this util later
 
 const DEFAULT_COLOR = '#FFFFFF'; // White for empty slots
@@ -20,54 +21,6 @@ const getRandomColor = () => {
   }
   return color;
 };
-
-// TabContent component to isolate each tab's content
-const TabContent = React.memo(({ 
-  tabId, 
-  isActive,
-  people,
-  timeSlots,
-  schedule,
-  activities,
-  onCellUpdateDirect,
-  onCellEnter,
-  onCellClick,
-  selectedActivityColor,
-  onRemovePerson
-}) => {
-  console.log(`Rendering TabContent for ${tabId} with ${Object.keys(schedule).length} people, active: ${isActive}`);
-  
-  // Create tab-specific event handlers
-  const handleCellUpdateDirect = useCallback((personId, timeSlot) => {
-    console.log(`Direct cell update in tab ${tabId}:`, personId, timeSlot);
-    onCellUpdateDirect(personId, timeSlot, tabId);
-  }, [tabId, onCellUpdateDirect]);
-  
-  const handleCellEnter = useCallback((personId, timeSlot) => {
-    onCellEnter(personId, timeSlot, tabId);
-  }, [tabId, onCellEnter]);
-  
-  const handleCellClick = useCallback((personId, timeSlot) => {
-    onCellClick(personId, timeSlot, tabId);
-  }, [tabId, onCellClick]);
-  
-  return (
-    <div style={{ display: isActive ? 'block' : 'none', width: '100%' }}>
-      <ScheduleGrid
-        key={`schedule-grid-${tabId}`}
-        people={people}
-        timeSlots={timeSlots}
-        schedule={schedule}
-        activities={activities}
-        onCellUpdateDirect={handleCellUpdateDirect}
-        onCellEnter={handleCellEnter}
-        onCellClick={handleCellClick}
-        selectedActivityColor={selectedActivityColor}
-        onRemovePerson={onRemovePerson}
-      />
-    </div>
-  );
-});
 
 function App() {
   // State Initialization
@@ -311,6 +264,55 @@ function App() {
   // Add a state to force updates
   const [forceUpdate, setForceUpdate] = useState(false);
 
+  // Clear all cells in the current tab
+  const clearTab = useCallback((tabId = null) => {
+    const targetTabId = tabId || activeTabId;
+    
+    if (window.confirm(`Are you sure you want to clear all assignments in the "${tabs.find(t => t.id === targetTabId)?.name}" tab?`)) {
+      setSchedules(prevSchedules => {
+        const currentSchedule = prevSchedules[targetTabId] || {};
+        const clearedSchedule = {};
+        
+        // Preserve the people structure but reset all assignments to 'empty'
+        Object.keys(currentSchedule).forEach(personId => {
+          clearedSchedule[personId] = {};
+          timeSlots.forEach(slot => {
+            clearedSchedule[personId][slot.value] = 'empty';
+          });
+        });
+        
+        return {
+          ...prevSchedules,
+          [targetTabId]: clearedSchedule
+        };
+      });
+    }
+  }, [activeTabId, tabs, timeSlots]);
+  
+  // Duplicate the current tab
+  const duplicateTab = useCallback(() => {
+    const currentTab = tabs.find(tab => tab.id === activeTabId);
+    if (!currentTab) return;
+    
+    const newTabId = `tab_${Date.now()}`;
+    const newTabName = `${currentTab.name} (Copy)`;
+    
+    // Add new tab
+    setTabs(prevTabs => [...prevTabs, { id: newTabId, name: newTabName }]);
+    
+    // Copy the current tab's schedule
+    setSchedules(prevSchedules => {
+      const currentSchedule = prevSchedules[activeTabId] || {};
+      return {
+        ...prevSchedules,
+        [newTabId]: JSON.parse(JSON.stringify(currentSchedule))
+      };
+    });
+    
+    // Set the new tab as active
+    handleTabSelect(newTabId);
+  }, [activeTabId, tabs, handleTabSelect]);
+
   // Handlers for tabs
   const handleAddTab = () => {
     const newTabId = `tab_${Date.now()}`;
@@ -319,12 +321,20 @@ function App() {
     // Add new tab
     setTabs(prevTabs => [...prevTabs, { id: newTabId, name: newTabName }]);
     
-    // Create new schedule based on the current active tab's schedule
+    // Create a new blank schedule (not copying the current tab)
     setSchedules(prevSchedules => {
-      const currentSchedule = prevSchedules[activeTabId] || {};
+      // Create empty schedule with entries for all people
+      const emptySchedule = {};
+      people.forEach(person => {
+        emptySchedule[person.id] = {};
+        timeSlots.forEach(slot => {
+          emptySchedule[person.id][slot.value] = 'empty';
+        });
+      });
+      
       return {
         ...prevSchedules,
-        [newTabId]: JSON.parse(JSON.stringify(currentSchedule))
+        [newTabId]: emptySchedule
       };
     });
     
@@ -559,6 +569,8 @@ function App() {
         onAddTab={handleAddTab}
         onRemoveTab={handleRemoveTab}
         onRenameTab={handleRenameTab}
+        onClearTab={() => clearTab()}
+        onDuplicateTab={duplicateTab}
       />
       <div className="layout-container">
           <ActivityPalette
@@ -569,23 +581,25 @@ function App() {
               onUpdateActivityColor={updateActivityColor}
           />
           
-          {/* Render a TabContent for each tab but only show the active one */}
-          {tabs.map(tab => (
-            <TabContent
-              key={`tab-content-${tab.id}`}
-              tabId={tab.id}
-              isActive={tab.id === activeTabId}
-              people={people}
-              timeSlots={timeSlots}
-              schedule={schedules[tab.id] || {}}
-              activities={activities}
-              onCellUpdateDirect={updateScheduleForCell}
-              onCellEnter={handleCellEnter}
-              onCellClick={handleCellClick}
-              selectedActivityColor={getSelectedActivityColor()}
-              onRemovePerson={removePerson}
-            />
-          ))}
+          <div className="tabs-content-container">
+            {/* Render a TabContent for each tab but only show the active one */}
+            {tabs.map(tab => (
+              <TabContent
+                key={`tab-content-${tab.id}`}
+                tabId={tab.id}
+                isActive={tab.id === activeTabId}
+                people={people}
+                timeSlots={timeSlots}
+                schedule={schedules[tab.id] || {}}
+                activities={activities}
+                onCellUpdateDirect={updateScheduleForCell}
+                onCellEnter={handleCellEnter}
+                onCellClick={handleCellClick}
+                selectedActivityColor={getSelectedActivityColor()}
+                onRemovePerson={removePerson}
+              />
+            ))}
+          </div>
       </div>
     </div>
   );
