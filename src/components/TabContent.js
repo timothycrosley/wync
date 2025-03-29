@@ -14,7 +14,8 @@ const TabContent = React.memo(({
   onCellEnter,
   onCellClick,
   selectedActivityColor,
-  onRemovePerson
+  onRemovePerson,
+  onRenamePerson
 }) => {
   // Create tab-specific event handlers
   const handleCellUpdateDirect = useCallback((personId, timeSlot) => {
@@ -73,6 +74,7 @@ const TabContent = React.memo(({
         onCellClick={handleCellClick}
         selectedActivityColor={selectedActivityColor}
         onRemovePerson={onRemovePerson}
+        onRenamePerson={onRenamePerson}
       />
     </div>
   );

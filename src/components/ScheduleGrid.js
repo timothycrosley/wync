@@ -11,7 +11,8 @@ function ScheduleGrid({
   onCellEnter,
   onCellClick,
   selectedActivityColor, 
-  onRemovePerson
+  onRemovePerson,
+  onRenamePerson
 }) {
 
   const getActivityById = useCallback((id) => {
@@ -62,6 +63,7 @@ function ScheduleGrid({
                     onCellClick={onCellClick}
                     selectedActivityColor={selectedActivityColor}
                     onRemovePerson={onRemovePerson}
+                    onRenamePerson={onRenamePerson}
                 />
             ))}
         </div>

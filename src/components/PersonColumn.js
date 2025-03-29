@@ -1,10 +1,24 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import TimeSlotCell from './TimeSlotCell';
 import './PersonColumn.css'; // Create CSS next
 
 const TIME_INTERVAL_MINUTES = 30; // Assuming 30 min intervals as set in App.js
 
-function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpdateDirect, onCellEnter, onCellClick, selectedActivityColor, onRemovePerson }) {
+function PersonColumn({ 
+  person, 
+  timeSlots, 
+  schedule, 
+  getActivityById, 
+  onCellUpdateDirect, 
+  onCellEnter, 
+  onCellClick, 
+  selectedActivityColor, 
+  onRemovePerson,
+  onRenamePerson
+}) {
+  // State for editing person name
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState(person.name);
 
   // Calculate summaries
   const activitySummaries = useMemo(() => {
@@ -38,10 +52,64 @@ function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpda
     onRemovePerson(person.id);
   };
 
+  // Handle double click to start editing
+  const handleNameDoubleClick = (e) => {
+    e.preventDefault();
+    setIsEditing(true);
+    setNewName(person.name);
+  };
+
+  // Handle name change
+  const handleNameChange = (e) => {
+    setNewName(e.target.value);
+  };
+
+  // Handle save name
+  const handleNameSave = () => {
+    if (newName.trim()) {
+      onRenamePerson(person.id, newName);
+    }
+    setIsEditing(false);
+  };
+
+  // Handle key press
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleNameSave();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setNewName(person.name); // Reset to original
+    }
+  };
+
+  // Handle blur
+  const handleBlur = () => {
+    handleNameSave();
+  };
+
   return (
     <div className="person-column">
       <div className="header-cell person-header-cell">
-        <span className="person-name">{person.name}</span>
+        {isEditing ? (
+          <input
+            type="text"
+            value={newName}
+            onChange={handleNameChange}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+            autoFocus
+            className="person-name-input"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <span 
+            className="person-name"
+            onDoubleClick={handleNameDoubleClick}
+            title="Double-click to rename"
+          >
+            {person.name}
+          </span>
+        )}
         <button onClick={handleRemoveClick} className="remove-button person-remove-button" title="Remove Person">×</button>
       </div>
 

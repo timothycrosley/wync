@@ -37,6 +37,36 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    cursor: pointer; /* Show pointer on hover to indicate it's interactive */
+}
+
+.person-name:hover {
+    text-decoration: underline dashed;
+    color: #0056b3;
+}
+
+.person-name-input {
+    flex-grow: 1;
+    border: none;
+    border-bottom: 1px solid #007bff;
+    background: transparent;
+    font-size: 1em;
+    font-weight: inherit;
+    padding: 2px 0;
+    outline: none;
+    width: 100%;
+    animation: inputAppear 0.3s ease-in-out;
+}
+
+@keyframes inputAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .person-remove-button {

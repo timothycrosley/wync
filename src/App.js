@@ -373,6 +373,24 @@ function App() {
     );
   };
 
+  // Function to rename a person
+  const renamePerson = useCallback((personId, newName) => {
+    if (!newName.trim()) return; // Prevent empty names
+    
+    // Check for duplicate names
+    if (people.some(p => p.name === newName.trim() && p.id !== personId)) {
+      alert('A person with this name already exists.');
+      return;
+    }
+    
+    // Update the person's name
+    setPeople(prevPeople => 
+      prevPeople.map(person => 
+        person.id === personId ? { ...person, name: newName.trim() } : person
+      )
+    );
+  }, [people]);
+
   // Handlers for people and activities
   const addPerson = (name) => {
     if (name && !people.some(p => p.name === name)) {
@@ -601,6 +619,7 @@ function App() {
                 onCellClick={handleCellClick}
                 selectedActivityColor={getSelectedActivityColor()}
                 onRemovePerson={removePerson}
+                onRenamePerson={renamePerson}
               />
             ))}
           </div>
