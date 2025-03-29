@@ -16,71 +16,127 @@ function ScheduleGrid({
 }) {
   const [summaryHeight, setSummaryHeight] = useState(100);
   const summarySpaceRef = useRef(null);
+  const recalcTimeoutRef = useRef(null);
+  const isDraggingRef = useRef(false);
   
-  // Observe all activity-summary elements to find the tallest one
+  // Simplified approach for consistent heights across columns
   useEffect(() => {
-    // Instead of trying to micromanage heights with ResizeObserver,
-    // let's use a MutationObserver to detect when content changes
-    // and then calculate heights more directly
+    let isUserInteracting = false;
+    let pendingUpdate = false;
     
-    const recalculateHeights = () => {
-      // Get all summary elements
-      const summaryElements = document.querySelectorAll('.activity-summary');
-      if (!summaryElements.length) return;
+    // Fixed height calculation that ensures consistent heights
+    const recalculateHeights = (immediate = false) => {
+      // Don't update during interactions unless explicitly forced
+      if (isUserInteracting && !immediate) {
+        pendingUpdate = true;
+        return;
+      }
       
-      // First, reset any previously set height to let content determine natural height
-      summaryElements.forEach(el => {
-        el.style.height = 'auto';
-        el.style.minHeight = '100px';
-      });
+      // Clear any pending timeouts
+      clearTimeout(recalcTimeoutRef.current);
       
-      // Small delay to let the DOM update with natural heights
-      setTimeout(() => {
-        // Calculate the maximum height
-        let maxHeight = 100; // minimum height
-        summaryElements.forEach(el => {
-          const height = el.scrollHeight;
-          if (height > maxHeight) {
-            maxHeight = height;
+      // Delay to batch updates
+      recalcTimeoutRef.current = setTimeout(() => {
+        // 1. First reset all heights to auto to get natural height
+        const allSummaries = document.querySelectorAll('.activity-summary');
+        const summarySpace = summarySpaceRef.current;
+        
+        if (!allSummaries.length) return;
+        
+        // Store current scroll position to restore later
+        const scrollTop = document.querySelector('.schedule-grid-container')?.scrollTop || 0;
+        
+        // Temporarily reset heights to determine natural height
+        allSummaries.forEach(el => {
+          el.style.height = 'auto';
+          el.style.minHeight = '100px';
+          el.style.maxHeight = 'none';
+        });
+        
+        // 2. Let the browser render to calculate actual heights
+        setTimeout(() => {
+          // 3. Find the tallest summary
+          let maxHeight = 100; // minimum
+          allSummaries.forEach(el => {
+            maxHeight = Math.max(maxHeight, el.scrollHeight);
+          });
+          
+          // Add some padding
+          maxHeight += 8;
+          
+          // 4. Apply the same fixed height to all summaries and the blank space
+          if (summarySpace) {
+            summarySpace.style.height = `${maxHeight}px`;
           }
-        });
-        
-        // Set the summary space height
-        if (summarySpaceRef.current) {
-          summarySpaceRef.current.style.height = `${maxHeight}px`;
-        }
-        
-        // Ensure all summary elements have the same height
-        summaryElements.forEach(el => {
-          el.style.minHeight = `${maxHeight}px`;
-        });
-      }, 0);
+          
+          allSummaries.forEach(el => {
+            el.style.height = `${maxHeight}px`;
+            el.style.minHeight = `${maxHeight}px`;
+            el.style.maxHeight = `${maxHeight}px`;
+          });
+          
+          // Update state
+          setSummaryHeight(maxHeight);
+          
+          // Restore scroll position
+          if (document.querySelector('.schedule-grid-container')) {
+            document.querySelector('.schedule-grid-container').scrollTop = scrollTop;
+          }
+          
+          pendingUpdate = false;
+        }, 0);
+      }, immediate ? 0 : 150);
     };
     
-    // Set up a MutationObserver to detect content changes in any summary element
-    const observer = new MutationObserver(recalculateHeights);
+    // Only process content changes when not interacting
+    const handleMutation = () => {
+      if (!isUserInteracting) {
+        recalculateHeights(false);
+      }
+    };
     
-    // Observe all summary sections for content changes
+    // Observe content changes
+    const observer = new MutationObserver(handleMutation);
     const summaryElements = document.querySelectorAll('.activity-summary');
     summaryElements.forEach(el => {
-      observer.observe(el, { 
-        childList: true,    // observe direct child additions/removals
-        subtree: true,      // observe all descendants
-        characterData: true // observe text changes
-      });
+      observer.observe(el, { childList: true, subtree: true });
     });
     
-    // Initial calculation
-    recalculateHeights();
+    // Track user interaction to prevent jumps
+    const handleInteractionStart = () => {
+      isUserInteracting = true;
+    };
     
-    // Recalculate on window resize too
-    window.addEventListener('resize', recalculateHeights);
+    const handleInteractionEnd = () => {
+      isUserInteracting = false;
+      if (pendingUpdate) {
+        // Process any updates that were pending during interaction
+        setTimeout(() => recalculateHeights(true), 300);
+      }
+    };
+    
+    // Add interaction listeners
+    document.addEventListener('mousedown', handleInteractionStart);
+    document.addEventListener('mouseup', handleInteractionEnd);
+    
+    // Initial calculation
+    recalculateHeights(true);
+    
+    // Handle window resize
+    const handleResize = () => {
+      clearTimeout(recalcTimeoutRef.current);
+      recalcTimeoutRef.current = setTimeout(() => recalculateHeights(true), 200);
+    };
+    window.addEventListener('resize', handleResize);
     
     return () => {
       observer.disconnect();
-      window.removeEventListener('resize', recalculateHeights);
+      clearTimeout(recalcTimeoutRef.current);
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('mousedown', handleInteractionStart);
+      document.removeEventListener('mouseup', handleInteractionEnd);
     };
-  }, [people]); // Re-run when people changes
+  }, [people]);
 
   const getActivityById = useCallback((id) => {
     return activities.find(a => a.id === id) || { id: 'empty', name: 'Empty', color: '#FFFFFF' };

@@ -75,22 +75,27 @@
 }
 
 .activity-summary {
-    min-height: 100px; /* Minimum height */
-    height: auto !important; /* Override inline styles with !important to allow content to dictate height */
-    max-height: none; /* Remove max height limitation */
+    min-height: 100px;
+    height: auto; /* Let JavaScript control the height */
     border-bottom: 1px solid #ccc;
     padding: 8px;
     font-size: 0.8em;
     background-color: #f1f3f5;
-    overflow: visible; /* Allow content to be visible without scrolling */
+    overflow: visible; /* Show all content */
     display: flex;
     flex-direction: column;
     gap: 4px;
+    box-sizing: border-box; /* Include padding in height calculation */
 }
 
-/* Remove webkit scrollbar customization since we don't need scrollbars */
+/* Remove scrollbar elements */
 .activity-summary::-webkit-scrollbar {
     display: none;
+}
+
+.activity-summary {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 .summary-item {

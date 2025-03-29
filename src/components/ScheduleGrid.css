@@ -53,11 +53,11 @@
 }
 
 .summary-space {
-    min-height: 100px; /* Minimum height */
-    height: auto; /* Allow automatic height adjustment */
-    max-height: none; /* Remove max height limitation */
+    min-height: 100px;
+    height: auto; /* Let JavaScript control the height */
     border-bottom: 1px solid #ccc;
-    background-color: #f1f3f5; /* Slightly different background for summary area */
+    background-color: #f1f3f5;
+    box-sizing: border-box; /* Include padding in height calculation */
 }
 
 .time-slot-label {
