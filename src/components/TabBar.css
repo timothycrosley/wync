@@ -1,0 +1,141 @@
+.tab-bar {
+  display: flex;
+  align-items: center;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+  padding: 0 5px;
+  margin-bottom: 0;
+  height: 40px;
+  width: 100%;
+}
+
+.tabs-container {
+  display: flex;
+  flex-grow: 1;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  height: 100%;
+}
+
+.tabs-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabs-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.tabs-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  background-color: #e4e4e4;
+  border-right: 1px solid #ccc;
+  cursor: pointer;
+  height: 100%;
+  min-width: 120px;
+  max-width: 200px;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.tab:hover {
+  background-color: #ddd;
+}
+
+.tab.active {
+  background-color: #fff;
+  border-bottom: 2px solid #007bff;
+  font-weight: 500;
+}
+
+.tab-name {
+  margin-right: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+}
+
+.tab-name-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 1em;
+  padding: 0;
+  margin: 0;
+}
+
+.tab-close-button {
+  background: none;
+  border: none;
+  color: #777;
+  cursor: pointer;
+  font-size: 16px;
+  height: 20px;
+  width: 20px;
+  line-height: 1;
+  padding: 0;
+  margin-left: 5px;
+  border-radius: 50%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-close-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+.tab-actions {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.tab-action-button {
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  margin: 0 2px;
+}
+
+.tab-action-button:hover {
+  background-color: #ddd;
+}
+
+.add-tab-button {
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 24px;
+  padding: 0 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 5px;
+}
+
+.add-tab-button:hover {
+  background-color: #ddd;
+} 
