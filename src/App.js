@@ -21,6 +21,54 @@ const getRandomColor = () => {
   return color;
 };
 
+// TabContent component to isolate each tab's content
+const TabContent = React.memo(({ 
+  tabId, 
+  isActive,
+  people,
+  timeSlots,
+  schedule,
+  activities,
+  onCellUpdateDirect,
+  onCellEnter,
+  onCellClick,
+  selectedActivityColor,
+  onRemovePerson
+}) => {
+  console.log(`Rendering TabContent for ${tabId} with ${Object.keys(schedule).length} people, active: ${isActive}`);
+  
+  // Create tab-specific event handlers
+  const handleCellUpdateDirect = useCallback((personId, timeSlot) => {
+    console.log(`Direct cell update in tab ${tabId}:`, personId, timeSlot);
+    onCellUpdateDirect(personId, timeSlot, tabId);
+  }, [tabId, onCellUpdateDirect]);
+  
+  const handleCellEnter = useCallback((personId, timeSlot) => {
+    onCellEnter(personId, timeSlot, tabId);
+  }, [tabId, onCellEnter]);
+  
+  const handleCellClick = useCallback((personId, timeSlot) => {
+    onCellClick(personId, timeSlot, tabId);
+  }, [tabId, onCellClick]);
+  
+  return (
+    <div style={{ display: isActive ? 'block' : 'none', width: '100%' }}>
+      <ScheduleGrid
+        key={`schedule-grid-${tabId}`}
+        people={people}
+        timeSlots={timeSlots}
+        schedule={schedule}
+        activities={activities}
+        onCellUpdateDirect={handleCellUpdateDirect}
+        onCellEnter={handleCellEnter}
+        onCellClick={handleCellClick}
+        selectedActivityColor={selectedActivityColor}
+        onRemovePerson={onRemovePerson}
+      />
+    </div>
+  );
+});
+
 function App() {
   // State Initialization
   const [people, setPeople] = useState(() => {
@@ -60,7 +108,16 @@ function App() {
   const [schedules, setSchedules] = useState(() => {
     const savedSchedules = localStorage.getItem('scheduleAppSchedules');
     if (savedSchedules) {
-      return JSON.parse(savedSchedules);
+      const parsedSchedules = JSON.parse(savedSchedules);
+      // Ensure each tab has a schedule
+      const tabs = JSON.parse(localStorage.getItem('scheduleAppTabs') || '[]');
+      const defaultSchedules = {};
+      tabs.forEach(tab => {
+        if (!parsedSchedules[tab.id]) {
+          defaultSchedules[tab.id] = {};
+        }
+      });
+      return { ...defaultSchedules, ...parsedSchedules };
     }
     
     // Check if there's a legacy single schedule to migrate
@@ -74,6 +131,7 @@ function App() {
 
   const [selectedActivityId, setSelectedActivityId] = useState('empty');
   const isMouseDownRef = useRef(false);
+  const tabKeyPressedRef = useRef(false);
 
   const timeSlots = generateTimeSlots('00:00', '24:00', 30); // Full 24 hours, 30 min intervals
 
@@ -87,14 +145,53 @@ function App() {
       isMouseDownRef.current = false;
     };
     
+    // Support for multi-selection with Tab key or Ctrl/Cmd key
+    const handleKeyDown = (e) => {
+      // Tab key or Ctrl/Cmd key for multi-selection
+      if (e.key === 'Tab' || e.key === 'Control' || e.key === 'Meta') {
+        // Only prevent default for Tab, as it would change focus
+        if (e.key === 'Tab') {
+          e.preventDefault();
+        }
+        tabKeyPressedRef.current = true;
+        document.body.classList.add('tab-key-pressed');
+      }
+      
+      // Escape key shortcut to select 'empty' activity
+      if (e.key === 'Escape' && tabKeyPressedRef.current) {
+        setSelectedActivityId('empty');
+      }
+    };
+    
+    const handleKeyUp = (e) => {
+      if (e.key === 'Tab' || e.key === 'Control' || e.key === 'Meta') {
+        // Only prevent default for Tab, as it would change focus
+        if (e.key === 'Tab') {
+          e.preventDefault();
+        }
+        tabKeyPressedRef.current = false;
+        document.body.classList.remove('tab-key-pressed');
+        // Clear active cell indicators
+        const activeElements = document.querySelectorAll('.tab-key-active');
+        activeElements.forEach(el => {
+          el.classList.remove('tab-key-active');
+        });
+      }
+    };
+    
     // Add event listeners to the window
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
     
     // Cleanup on unmount
     return () => {
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      document.body.classList.remove('tab-key-pressed');
     };
   }, []);
 
@@ -175,10 +272,44 @@ function App() {
     });
   }, [people, timeSlots, tabs]); // Rerun if people, timeSlots, or tabs change
 
-  // Get current schedule for active tab
-  const getCurrentSchedule = () => {
-    return schedules[activeTabId] || {};
-  };
+  // Ensure all tabs have valid schedules on component mount
+  useEffect(() => {
+    setSchedules(prevSchedules => {
+      const newSchedules = { ...prevSchedules };
+      let needsUpdate = false;
+      
+      // Make sure each tab has a schedule
+      tabs.forEach(tab => {
+        if (!newSchedules[tab.id]) {
+          console.log(`Creating missing schedule for tab ${tab.id}`);
+          newSchedules[tab.id] = {};
+          needsUpdate = true;
+        }
+      });
+      
+      // Clean up orphaned schedules (no matching tab)
+      Object.keys(newSchedules).forEach(scheduleId => {
+        if (!tabs.some(tab => tab.id === scheduleId)) {
+          console.log(`Removing orphaned schedule for deleted tab ${scheduleId}`);
+          delete newSchedules[scheduleId];
+          needsUpdate = true;
+        }
+      });
+      
+      return needsUpdate ? newSchedules : prevSchedules;
+    });
+  }, [tabs]); // Run when tabs change
+
+  // Handler for when tab is selected
+  const handleTabSelect = useCallback((tabId) => {
+    console.log(`Switching to tab: ${tabId}`);
+    setActiveTabId(tabId);
+    // Force a re-render of the schedule grid by toggling a state value
+    setForceUpdate(prev => !prev);
+  }, []);
+  
+  // Add a state to force updates
+  const [forceUpdate, setForceUpdate] = useState(false);
 
   // Handlers for tabs
   const handleAddTab = () => {
@@ -189,13 +320,16 @@ function App() {
     setTabs(prevTabs => [...prevTabs, { id: newTabId, name: newTabName }]);
     
     // Create new schedule based on the current active tab's schedule
-    setSchedules(prevSchedules => ({
-      ...prevSchedules,
-      [newTabId]: JSON.parse(JSON.stringify(prevSchedules[activeTabId] || {}))
-    }));
+    setSchedules(prevSchedules => {
+      const currentSchedule = prevSchedules[activeTabId] || {};
+      return {
+        ...prevSchedules,
+        [newTabId]: JSON.parse(JSON.stringify(currentSchedule))
+      };
+    });
     
     // Set the new tab as active
-    setActiveTabId(newTabId);
+    handleTabSelect(newTabId);
   };
   
   const handleRemoveTab = (tabId) => {
@@ -206,7 +340,7 @@ function App() {
       if (tabId === activeTabId) {
         const tabIndex = tabs.findIndex(tab => tab.id === tabId);
         const newActiveIndex = tabIndex === 0 ? 1 : tabIndex - 1;
-        setActiveTabId(tabs[newActiveIndex].id);
+        handleTabSelect(tabs[newActiveIndex].id);
       }
       
       // Remove tab
@@ -330,15 +464,25 @@ function App() {
     );
   }, []); // No dependencies needed as setActivities is stable
 
-  // Function to update schedule state for current tab
-  const updateScheduleForCell = useCallback((personId, timeSlot) => {
+  // Function to update schedule state for specific tab
+  const updateScheduleForCell = useCallback((personId, timeSlot, specificTabId = null) => {
+    // Use provided tabId or fall back to active tab
+    const targetTabId = specificTabId || activeTabId;
+    
+    console.log(`Updating schedule for tab ${targetTabId}, person ${personId}, timeslot ${timeSlot}`);
+    
     setSchedules(prevSchedules => {
-      const currentSchedule = prevSchedules[activeTabId] || {};
+      const currentSchedule = prevSchedules[targetTabId] || {};
+      
+      // Only update if the activity is changing
       if (currentSchedule[personId]?.[timeSlot] === selectedActivityId) {
+        console.log(`Cell already has selected activity, skipping update`);
         return prevSchedules;
       }
       
-      console.log(`   Updating schedule for (${personId}, ${timeSlot}) in tab ${activeTabId}`);
+      console.log(`Updating cell in tab ${targetTabId} with activity ${selectedActivityId}`);
+      
+      // Create a new schedule object for this tab
       const updatedSchedule = {
         ...currentSchedule,
         [personId]: {
@@ -347,28 +491,58 @@ function App() {
         },
       };
       
-      return {
+      // Create a new schedules object with the updated tab schedule
+      const newSchedules = {
         ...prevSchedules,
-        [activeTabId]: updatedSchedule
+        [targetTabId]: updatedSchedule
       };
+      
+      console.log(`Updated schedules:`, Object.keys(newSchedules).map(id => ({ id, peopleCount: Object.keys(newSchedules[id]).length })));
+      
+      return newSchedules;
     });
   }, [activeTabId, selectedActivityId]);
 
   // Mouse drag handler
-  const handleCellEnter = useCallback((personId, timeSlot) => {
-      console.log(`   Cell Entered (${personId}, ${timeSlot}) - checking ref`);
-      if (isMouseDownRef.current) { 
-          console.log(`   --> Mouse is down, calling updateScheduleForCell`);
-          updateScheduleForCell(personId, timeSlot);
+  const handleCellEnter = useCallback((personId, timeSlot, specificTabId = null) => {
+      console.log(`Cell Entered (${personId}, ${timeSlot}) - checking ref`);
+      if (isMouseDownRef.current || tabKeyPressedRef.current) { 
+          console.log(`Mouse is down or Tab is pressed, calling updateScheduleForCell`);
+          updateScheduleForCell(personId, timeSlot, specificTabId);
+          
+          // Mark the cell as active when using Tab key
+          if (tabKeyPressedRef.current) {
+            const cell = document.querySelector(`.time-slot-cell[data-person-id="${personId}"][data-time-slot="${timeSlot}"]`);
+            if (cell) {
+              cell.classList.add('tab-key-active');
+            }
+          }
       } else {
-          console.log(`   --> Mouse is up, update blocked`);
+          console.log(`Mouse is up, update blocked`);
       }
-  }, [isMouseDownRef, updateScheduleForCell]);
+  }, [isMouseDownRef, tabKeyPressedRef, updateScheduleForCell]);
+
+  // Function to handle direct cell click (separate from drag)
+  const handleCellClick = useCallback((personId, timeSlot, specificTabId = null) => {
+      updateScheduleForCell(personId, timeSlot, specificTabId);
+  }, [updateScheduleForCell]);
 
   const getSelectedActivityColor = () => {
       const activity = activities.find(a => a.id === selectedActivityId);
       return activity ? activity.color : DEFAULT_COLOR;
   }
+
+  // Get current schedule for active tab
+  const getCurrentSchedule = useCallback(() => {
+    // Ensure the schedule exists for the active tab
+    if (!schedules[activeTabId]) {
+      console.log(`No schedule found for tab ${activeTabId}, creating empty one`);
+      setSchedules(prev => ({ ...prev, [activeTabId]: {} }));
+      return {};
+    }
+    console.log(`Loaded schedule for tab ${activeTabId}:`, Object.keys(schedules[activeTabId]));
+    return schedules[activeTabId];
+  }, [activeTabId, schedules]);
 
   return (
     <div className="App">
@@ -381,7 +555,7 @@ function App() {
       <TabBar
         tabs={tabs}
         activeTabId={activeTabId}
-        onTabSelect={setActiveTabId}
+        onTabSelect={handleTabSelect}
         onAddTab={handleAddTab}
         onRemoveTab={handleRemoveTab}
         onRenameTab={handleRenameTab}
@@ -394,16 +568,24 @@ function App() {
               onRemoveActivity={removeActivity}
               onUpdateActivityColor={updateActivityColor}
           />
-          <ScheduleGrid
+          
+          {/* Render a TabContent for each tab but only show the active one */}
+          {tabs.map(tab => (
+            <TabContent
+              key={`tab-content-${tab.id}`}
+              tabId={tab.id}
+              isActive={tab.id === activeTabId}
               people={people}
               timeSlots={timeSlots}
-              schedule={getCurrentSchedule()}
+              schedule={schedules[tab.id] || {}}
               activities={activities}
               onCellUpdateDirect={updateScheduleForCell}
               onCellEnter={handleCellEnter}
+              onCellClick={handleCellClick}
               selectedActivityColor={getSelectedActivityColor()}
               onRemovePerson={removePerson}
-          />
+            />
+          ))}
       </div>
     </div>
   );

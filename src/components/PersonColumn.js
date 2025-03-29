@@ -4,7 +4,7 @@ import './PersonColumn.css'; // Create CSS next
 
 const TIME_INTERVAL_MINUTES = 30; // Assuming 30 min intervals as set in App.js
 
-function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpdateDirect, onCellEnter, selectedActivityColor, onRemovePerson }) {
+function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpdateDirect, onCellEnter, onCellClick, selectedActivityColor, onRemovePerson }) {
 
   // Calculate summaries
   const activitySummaries = useMemo(() => {
@@ -47,16 +47,24 @@ function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpda
 
       {/* Activity Summary Section */}
       <div className="activity-summary">
-          {Object.entries(activitySummaries.summaries).map(([activityId, hours]) => {
-              const activity = getActivityById(activityId);
-              return activity ? (
-                  <div key={activityId} className="summary-item">
-                      <span className="summary-color" style={{ backgroundColor: activity.color }}></span>
-                      <span className="summary-name">{activity.name}:</span>
-                      <span className="summary-hours">{hours}h</span>
-                  </div>
-              ) : null;
-          })}
+          {Object.entries(activitySummaries.summaries).length > 0 ? (
+              // Only show activities if there are any
+              Object.entries(activitySummaries.summaries).map(([activityId, hours]) => {
+                  const activity = getActivityById(activityId);
+                  return activity ? (
+                      <div key={activityId} className="summary-item">
+                          <span className="summary-color" style={{ backgroundColor: activity.color }}></span>
+                          <span className="summary-name">{activity.name}:</span>
+                          <span className="summary-hours">{hours}h</span>
+                      </div>
+                  ) : null;
+              })
+          ) : (
+              // Show a message if no activities are assigned
+              <div className="summary-item empty-message">
+                  <span className="summary-name">No activities assigned</span>
+              </div>
+          )}
           <div className="summary-item unassigned-summary">
               <span className="summary-color" style={{ backgroundColor: '#eee' }}></span>
               <span className="summary-name">Unassigned:</span>
@@ -66,8 +74,8 @@ function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpda
 
       {/* Time Slot Cells */}
       {timeSlots.map(slot => {
-        const activityId = schedule[slot.value]; // Use slot.value for lookup
-        const activity = activityId ? getActivityById(activityId) : getActivityById('empty');
+        const activityId = schedule[slot.value] || 'empty'; // Default to empty if not found
+        const activity = getActivityById(activityId);
 
         return (
           <TimeSlotCell
@@ -77,6 +85,7 @@ function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpda
             activity={activity}
             onUpdateDirect={onCellUpdateDirect}
             onEnter={onCellEnter}
+            onClick={onCellClick}
             selectedActivityColor={selectedActivityColor}
           />
         );

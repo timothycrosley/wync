@@ -1,5 +1,7 @@
 .time-slot-cell {
   height: 31px; /* Fixed height - MUST match .time-slot-label */
+  min-height: 31px; /* Enforce minimum height */
+  max-height: 31px; /* Enforce maximum height */
   border-bottom: 1px solid #eee;
   /* Add a subtle left border for visual separation between people */
   border-left: 1px solid #eee;
@@ -19,6 +21,7 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  box-sizing: border-box; /* Include padding in height calculation */
 }
 
 /* Remove left border from the very first column of cells (time labels don't need it) */
@@ -39,8 +42,8 @@
 .time-slot-cell:hover {
      /* Use the CSS variable passed from the component for hover preview */
      background-color: var(--selected-activity-color, #ffffff) !important; /* Use fallback just in case */
-     outline: 1px solid rgba(0, 0, 0, 0.4); /* Slightly stronger outline */
-     z-index: 1;
+     outline: 2px dashed var(--selected-activity-color);
+     z-index: 5;
 }
 
 /* Style for active cells during drag operation */
@@ -62,4 +65,48 @@
 .time-slot-cell.empty-cell .cell-activity-name {
     /* Optionally style text differently for empty cells if needed */
     color: #ccc; /* Lighter text for placeholder or empty */
+}
+
+/* Add a visual indicator for tab key multi-selection mode */
+.tab-key-pressed .time-slot-cell:hover {
+  outline: 3px solid #4a90e2;
+  z-index: 10;
+  transition: outline 0.1s ease;
+  cursor: cell; /* Change cursor to indicate multi-selection mode */
+}
+
+/* Add global indicator when tab key is pressed */
+.tab-key-pressed:after {
+  content: "Multi-select mode active (Tab/Ctrl) | Hover over cells to select | ESC to clear";
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(74, 144, 226, 0.9);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Add this class to cells that are actively being selected */
+.tab-key-active {
+  outline: 3px solid #4a90e2 !important;
+  z-index: 10;
+  position: relative;
+}
+
+/* Add mark to actively selected cells */
+.tab-key-active:after {
+  content: "✓";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(74, 144, 226, 0.8);
+  color: white;
+  font-size: 10px;
+  padding: 0 2px;
+  line-height: 1;
 }

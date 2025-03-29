@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import './TimeSlotCell.css'; // Create CSS next
 
 function TimeSlotCell({ 
@@ -7,6 +7,7 @@ function TimeSlotCell({
   activity, 
   onUpdateDirect, 
   onEnter, 
+  onClick,
   selectedActivityColor 
 }) {
   const [isHoveringLocal, setIsHoveringLocal] = useState(false);
@@ -14,6 +15,8 @@ function TimeSlotCell({
   const handleMouseEnter = useCallback(() => {
     setIsHoveringLocal(true);
     console.log(`Mouse Enter Cell (${personId}, ${timeSlot.display}) - Calling onEnter`);
+    
+    // We now handle all Tab key logic in App.js through onEnter
     onEnter(personId, timeSlot.value);
   }, [onEnter, personId, timeSlot]);
 
@@ -27,6 +30,20 @@ function TimeSlotCell({
     // Prevent default behavior to avoid text selection during dragging
     e.preventDefault();
   }, [onUpdateDirect, personId, timeSlot]);
+
+  const handleCellClick = useCallback((e) => {
+    // Skip if Tab key is pressed to avoid duplicate updates
+    if (document.body.classList.contains('tab-key-pressed')) {
+      return;
+    }
+    
+    // In case of a regular click (not drag), call the onClick handler directly
+    if (onClick) {
+      onClick(personId, timeSlot.value);
+    }
+    // Prevent default behavior
+    e.preventDefault();
+  }, [onClick, personId, timeSlot]);
 
   const cellStyle = {
     // Base background is the assigned activity color (or white for empty)
@@ -62,7 +79,10 @@ function TimeSlotCell({
         '--selected-activity-color': selectedActivityColor,
         color: textColor 
        }}
-      onMouseDown={handleCellMouseDown} 
+      data-person-id={personId}
+      data-time-slot={timeSlot.value}
+      onMouseDown={handleCellMouseDown}
+      onClick={handleCellClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       title={`${activity ? activity.name : 'Empty'} at ${timeSlot.display}`}

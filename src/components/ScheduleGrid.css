@@ -11,6 +11,8 @@
   border-radius: 5px;
   background-color: #fff;
   height: auto; /* Auto height based on content */
+  /* Ensure strict alignment */
+  table-layout: fixed;
 }
 
 .time-slots-column {
@@ -26,10 +28,13 @@
   text-align: center;
   border-bottom: 1px solid #ccc;
   background-color: #e9ecef; /* Slightly darker header */
-  min-height: 40px; /* Match person header height */
+  height: 40px; /* Exact fixed height */
+  min-height: 40px; 
+  max-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box; /* Include padding in height calculation */
 }
 
 .time-header-cell {
@@ -37,7 +42,9 @@
 }
 
 .summary-space {
-    min-height: 100px; /* Adjust as needed based on summary content */
+    height: 100px; /* Fixed height to match activity-summary */
+    min-height: 100px; /* Ensure it doesn't shrink */
+    max-height: 100px; /* Ensure it doesn't grow */
     border-bottom: 1px solid #ccc;
     background-color: #f1f3f5; /* Slightly different background for summary area */
 }
@@ -48,11 +55,13 @@
   border-bottom: 1px solid #eee;
   font-size: 0.9em;
   color: #555;
-  height: 31px; /* Fixed height (adjust if needed, must match TimeSlotCell) */
+  height: 31px; /* Fixed exact height */
+  min-height: 31px;
+  max-height: 31px;
   line-height: 30px; /* Vertically center text */
   white-space: nowrap;
   min-width: 90px; /* Ensure enough width for AM/PM time format */
-  /* Removed flex centering as line-height handles it with fixed height */
+  box-sizing: border-box; /* Include padding in height calculation */
 }
 
 /* Remove bottom border from last time slot label */

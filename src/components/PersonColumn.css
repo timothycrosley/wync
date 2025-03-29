@@ -3,11 +3,19 @@
   flex-direction: column;
   border-right: 1px solid #ccc;
   min-width: 150px; /* Minimum width for a person column */
+  flex: 1 0 auto; /* Grow but don't shrink */
 }
 
 /* Remove border from last person column */
 .person-column:last-child {
   border-right: none;
+}
+
+/* Force specific elements to have exact fixed heights to prevent misalignment */
+.person-column .header-cell {
+  height: 40px; /* Exact fixed height */
+  min-height: 40px;
+  max-height: 40px;
 }
 
 .person-header-cell {
@@ -35,7 +43,8 @@
 }
 
 .activity-summary {
-    min-height: 100px; /* Match summary-space height in ScheduleGrid.css */
+    height: 100px; /* Fixed height to match summary-space in ScheduleGrid.css */
+    max-height: 100px; /* Ensure it doesn't grow beyond this */
     border-bottom: 1px solid #ccc;
     padding: 8px;
     font-size: 0.8em;
@@ -44,12 +53,30 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    scrollbar-width: thin; /* For Firefox */
+}
+
+/* Webkit scrollbar customization for activity summary */
+.activity-summary::-webkit-scrollbar {
+    width: 6px;
+}
+
+.activity-summary::-webkit-scrollbar-track {
+    background: #f1f3f5;
+}
+
+.activity-summary::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
 }
 
 .summary-item {
     display: flex;
     align-items: center;
     gap: 5px;
+    min-height: 20px; /* Ensure consistent height */
+    padding: 2px 0;
+    overflow: hidden; /* Prevent overflow */
 }
 
 .summary-color {
@@ -63,6 +90,9 @@
 .summary-name {
     flex-grow: 1;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis for long names */
+    max-width: 70%; /* Limit width to make space for hours */
 }
 
 .summary-hours {
@@ -72,4 +102,9 @@
 
 .unassigned-summary {
     color: #555;
+}
+
+.empty-message {
+    color: #888;
+    font-style: italic;
 }

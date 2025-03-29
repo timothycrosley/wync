@@ -9,6 +9,7 @@ function ScheduleGrid({
   activities, 
   onCellUpdateDirect,
   onCellEnter,
+  onCellClick,
   selectedActivityColor, 
   onRemovePerson
 }) {
@@ -36,13 +37,15 @@ function ScheduleGrid({
       onSelectStart={handleSelectStart}
       onMouseDown={(e) => e.preventDefault()}
     >
-        <div className="schedule-grid">
+        <div className="schedule-grid grid-aligned">
             {/* Time Slot Labels Column */}
-            <div className="time-slots-column">
+            <div className="time-slots-column column-aligned">
                 <div className="header-cell time-header-cell">Time</div> {/* Header for time */}
                 <div className="summary-space"></div> {/* Space for summaries */}
                 {timeSlots.map(slot => (
-                    <div key={slot.value} className="time-slot-label">{slot.display}</div>
+                    <div key={slot.value} className="time-slot-label">
+                        {slot.display}
+                    </div>
                 ))}
             </div>
 
@@ -56,6 +59,7 @@ function ScheduleGrid({
                     getActivityById={getActivityById}
                     onCellUpdateDirect={onCellUpdateDirect}
                     onCellEnter={onCellEnter}
+                    onCellClick={onCellClick}
                     selectedActivityColor={selectedActivityColor}
                     onRemovePerson={onRemovePerson}
                 />
