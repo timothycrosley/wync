@@ -584,11 +584,6 @@ function App() {
 
   return (
     <div className="App">
-      <div className="controls">
-          <AddPersonForm onAddPerson={addPerson} />
-          <AddActivityForm onAddActivity={addActivity} />
-          <button onClick={clearAllData} className="clear-button">Clear All Data</button>
-      </div>
       <TabBar
         tabs={tabs}
         activeTabId={activeTabId}
@@ -599,6 +594,7 @@ function App() {
         onClearTab={() => clearTab()}
         onDuplicateTab={duplicateTab}
         onReorderTabs={handleReorderTabs}
+        onClearAllData={clearAllData}
       />
       <div className="layout-container">
           <ActivityPalette
@@ -607,6 +603,7 @@ function App() {
               onSelectActivity={setSelectedActivityId}
               onRemoveActivity={removeActivity}
               onUpdateActivityColor={updateActivityColor}
+              onAddActivity={addActivity}
           />
           
           <div className="tabs-content-container">
@@ -626,6 +623,7 @@ function App() {
                 selectedActivityColor={getSelectedActivityColor()}
                 onRemovePerson={removePerson}
                 onRenamePerson={renamePerson}
+                onAddPerson={addPerson}
               />
             ))}
           </div>

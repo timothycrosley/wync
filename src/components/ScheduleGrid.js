@@ -12,12 +12,23 @@ function ScheduleGrid({
   onCellClick,
   selectedActivityColor, 
   onRemovePerson,
-  onRenamePerson
+  onRenamePerson,
+  onAddPerson
 }) {
   const [summaryHeight, setSummaryHeight] = useState(100);
   const summarySpaceRef = useRef(null);
   const recalcTimeoutRef = useRef(null);
   const isDraggingRef = useRef(false);
+  const [newPersonName, setNewPersonName] = useState("");
+  const [isAddingPerson, setIsAddingPerson] = useState(false);
+  const newPersonInputRef = useRef(null);
+  
+  // Focus input when adding a new person
+  useEffect(() => {
+    if (isAddingPerson && newPersonInputRef.current) {
+      newPersonInputRef.current.focus();
+    }
+  }, [isAddingPerson]);
   
   // Simplified approach for consistent heights across columns
   useEffect(() => {
@@ -154,6 +165,30 @@ function ScheduleGrid({
     return false;
   }
 
+  const handleAddPersonClick = () => {
+    setIsAddingPerson(true);
+  };
+  
+  const handleAddPersonCancel = () => {
+    setIsAddingPerson(false);
+    setNewPersonName("");
+  };
+  
+  const handleAddPersonSubmit = (e) => {
+    e.preventDefault();
+    if (newPersonName.trim()) {
+      onAddPerson(newPersonName.trim());
+      setNewPersonName("");
+      setIsAddingPerson(false);
+    }
+  };
+  
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      handleAddPersonCancel();
+    }
+  };
+
   return (
     <div 
       className="schedule-grid-container"
@@ -189,9 +224,38 @@ function ScheduleGrid({
                     onRenamePerson={onRenamePerson}
                 />
             ))}
+            
+            {/* Add Person Column - Just shows a header to add a new person */}
+            <div className="add-person-column column-aligned">
+                <div className="header-cell add-person-header-cell">
+                    {isAddingPerson ? (
+                        <form onSubmit={handleAddPersonSubmit} className="add-person-form">
+                            <input
+                                type="text"
+                                value={newPersonName}
+                                onChange={(e) => setNewPersonName(e.target.value)}
+                                placeholder="Person name"
+                                className="add-person-input"
+                                ref={newPersonInputRef}
+                                onKeyDown={handleKeyDown}
+                                onBlur={handleAddPersonCancel}
+                            />
+                            <button type="submit" className="add-person-submit">+</button>
+                        </form>
+                    ) : (
+                        <div className="add-person-button" onClick={handleAddPersonClick}>
+                            <span className="add-person-icon">+</span>
+                            <span className="add-person-text">Add Person</span>
+                        </div>
+                    )}
+                </div>
+                <div className="summary-space"></div> {/* Empty summary space to match other columns */}
+                {timeSlots.map(slot => (
+                    <div key={slot.value} className="time-slot-placeholder"></div>
+                ))}
+            </div>
         </div>
     </div>
-
   );
 }
 

@@ -145,6 +145,15 @@
   background-color: #ddd;
 }
 
+.tab-action-button.clear-all-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.tab-action-button.clear-all-button:hover {
+  background-color: #c82333;
+}
+
 .add-tab-button {
   background: none;
   border: none;

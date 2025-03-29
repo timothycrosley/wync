@@ -143,3 +143,25 @@ body {
   width: 100%;
   overflow: auto;
 }
+
+.inline-actions {
+  display: flex;
+  padding: 5px 10px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.clear-all-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 0.9em;
+  cursor: pointer;
+  margin-right: auto;
+}
+
+.clear-all-button:hover {
+  background-color: #c82333;
+}

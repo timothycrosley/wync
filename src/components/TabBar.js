@@ -10,7 +10,8 @@ function TabBar({
   onRenameTab, 
   onClearTab,
   onDuplicateTab,
-  onReorderTabs
+  onReorderTabs,
+  onClearAllData
 }) {
   const [editingTabId, setEditingTabId] = useState(null);
   const [newTabName, setNewTabName] = useState('');
@@ -175,8 +176,11 @@ function TabBar({
         ))}
       </div>
       <div className="tab-actions">
+        <button className="tab-action-button clear-all-button" onClick={onClearAllData} title="Clear all data including people, activities, and tabs">
+          Clear All
+        </button>
         <button className="tab-action-button" onClick={onClearTab} title="Clear current tab">
-          Clear
+          Clear Tab
         </button>
         <button className="tab-action-button" onClick={onDuplicateTab} title="Duplicate current tab">
           Duplicate

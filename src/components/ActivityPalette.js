@@ -25,7 +25,14 @@ const getTextColor = (bgColor) => {
   }
 };
 
-function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onRemoveActivity, onUpdateActivityColor }) {
+function ActivityPalette({ 
+  activities, 
+  selectedActivityId, 
+  onSelectActivity, 
+  onRemoveActivity, 
+  onUpdateActivityColor,
+  onAddActivity // Add new prop for adding activities
+}) {
   // Filter out the 'Empty' activity from the visible palette
   const displayActivities = activities.filter(a => a.id !== 'empty');
 
@@ -35,6 +42,7 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
   // State for renaming activities
   const [editingActivityId, setEditingActivityId] = useState(null);
   const [newActivityName, setNewActivityName] = useState('');
+  const [newActivityInput, setNewActivityInput] = useState(''); // For the add activity form
   
   // Ref to store the long press timer
   const longPressTimerRef = useRef(null);
@@ -178,6 +186,14 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
      // Otherwise, do nothing (click was likely inside the picker popover)
   }, []);
 
+  // Handler for adding a new activity
+  const handleAddActivity = (e) => {
+    e.preventDefault();
+    if (!newActivityInput.trim()) return;
+    onAddActivity(newActivityInput.trim());
+    setNewActivityInput(''); // Clear input after adding
+  };
+
   return (
     <div className="activity-palette">
       <h3>Activities</h3>
@@ -194,6 +210,21 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
         </span>
         Clear Cell
       </div>
+      
+      {/* Add new activity form */}
+      <div className="add-activity-container">
+        <form onSubmit={handleAddActivity} className="add-activity-form-inline">
+          <input
+            type="text"
+            value={newActivityInput}
+            onChange={(e) => setNewActivityInput(e.target.value)}
+            placeholder="New activity"
+            className="add-activity-input"
+          />
+          <button type="submit" className="add-activity-button">+</button>
+        </form>
+      </div>
+      
       {/* Display other activities with remove buttons */}
       {displayActivities.map(activity => {
         // Calculate text color for this activity
