@@ -75,31 +75,22 @@
 }
 
 .activity-summary {
-    height: 100px; /* Fixed height to match summary-space in ScheduleGrid.css */
-    max-height: 100px; /* Ensure it doesn't grow beyond this */
+    min-height: 100px; /* Minimum height */
+    height: auto !important; /* Override inline styles with !important to allow content to dictate height */
+    max-height: none; /* Remove max height limitation */
     border-bottom: 1px solid #ccc;
     padding: 8px;
     font-size: 0.8em;
-    background-color: #f1f3f5; /* Match summary-space background */
-    overflow-y: auto; /* Allow scrolling if many activities */
+    background-color: #f1f3f5;
+    overflow: visible; /* Allow content to be visible without scrolling */
     display: flex;
     flex-direction: column;
     gap: 4px;
-    scrollbar-width: thin; /* For Firefox */
 }
 
-/* Webkit scrollbar customization for activity summary */
+/* Remove webkit scrollbar customization since we don't need scrollbars */
 .activity-summary::-webkit-scrollbar {
-    width: 6px;
-}
-
-.activity-summary::-webkit-scrollbar-track {
-    background: #f1f3f5;
-}
-
-.activity-summary::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 4px;
+    display: none;
 }
 
 .summary-item {

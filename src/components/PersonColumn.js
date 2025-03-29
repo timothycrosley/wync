@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import TimeSlotCell from './TimeSlotCell';
 import './PersonColumn.css'; // Create CSS next
 

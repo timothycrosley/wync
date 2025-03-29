@@ -53,9 +53,9 @@
 }
 
 .summary-space {
-    height: 100px; /* Fixed height to match activity-summary */
-    min-height: 100px; /* Ensure it doesn't shrink */
-    max-height: 100px; /* Ensure it doesn't grow */
+    min-height: 100px; /* Minimum height */
+    height: auto; /* Allow automatic height adjustment */
+    max-height: none; /* Remove max height limitation */
     border-bottom: 1px solid #ccc;
     background-color: #f1f3f5; /* Slightly different background for summary area */
 }
