@@ -42,7 +42,7 @@ function ScheduleGrid({
                 <div className="header-cell time-header-cell">Time</div> {/* Header for time */}
                 <div className="summary-space"></div> {/* Space for summaries */}
                 {timeSlots.map(slot => (
-                    <div key={slot} className="time-slot-label">{slot}</div>
+                    <div key={slot.value} className="time-slot-label">{slot.display}</div>
                 ))}
             </div>
 

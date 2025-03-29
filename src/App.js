@@ -136,20 +136,20 @@ function App() {
           if (!schedule[person.id]) {
             schedule[person.id] = {};
             timeSlots.forEach(slot => {
-              schedule[person.id][slot] = 'empty'; // Default to 'empty' activity
+              schedule[person.id][slot.value] = 'empty'; // Use slot.value (24h format) as key
             });
             scheduleUpdated = true;
           } else {
             // Ensure all current timeslots exist for the person
             timeSlots.forEach(slot => {
-              if (schedule[person.id][slot] === undefined) {
-                schedule[person.id][slot] = 'empty';
+              if (schedule[person.id][slot.value] === undefined) {
+                schedule[person.id][slot.value] = 'empty';
                 scheduleUpdated = true;
               }
             });
             // Clean up old timeslots no longer in use (optional)
             Object.keys(schedule[person.id]).forEach(existingSlot => {
-              if (!timeSlots.includes(existingSlot)) {
+              if (!timeSlots.some(slot => slot.value === existingSlot)) {
                 delete schedule[person.id][existingSlot];
                 scheduleUpdated = true;
               }

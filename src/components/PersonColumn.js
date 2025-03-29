@@ -12,7 +12,7 @@ function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpda
     let unassignedMinutes = 0;
 
     timeSlots.forEach(slot => {
-      const activityId = schedule[slot];
+      const activityId = schedule[slot.value]; // Use slot.value for lookup
       if (activityId && activityId !== 'empty') {
         const activity = getActivityById(activityId);
         if (activity) {
@@ -66,12 +66,12 @@ function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpda
 
       {/* Time Slot Cells */}
       {timeSlots.map(slot => {
-        const activityId = schedule[slot];
+        const activityId = schedule[slot.value]; // Use slot.value for lookup
         const activity = activityId ? getActivityById(activityId) : getActivityById('empty');
 
         return (
           <TimeSlotCell
-            key={slot}
+            key={slot.value}
             timeSlot={slot}
             personId={person.id}
             activity={activity}

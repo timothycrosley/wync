@@ -33,7 +33,7 @@
 }
 
 .time-header-cell {
-   min-width: 60px; /* Fixed width for time labels */
+   min-width: 90px; /* Increased from 60px to accommodate AM/PM format */
 }
 
 .summary-space {
@@ -51,6 +51,7 @@
   height: 31px; /* Fixed height (adjust if needed, must match TimeSlotCell) */
   line-height: 30px; /* Vertically center text */
   white-space: nowrap;
+  min-width: 90px; /* Ensure enough width for AM/PM time format */
   /* Removed flex centering as line-height handles it with fixed height */
 }
 

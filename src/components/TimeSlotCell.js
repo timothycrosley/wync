@@ -13,8 +13,8 @@ function TimeSlotCell({
 
   const handleMouseEnter = useCallback(() => {
     setIsHoveringLocal(true);
-    console.log(`Mouse Enter Cell (${personId}, ${timeSlot}) - Calling onEnter`);
-    onEnter(personId, timeSlot);
+    console.log(`Mouse Enter Cell (${personId}, ${timeSlot.display}) - Calling onEnter`);
+    onEnter(personId, timeSlot.value);
   }, [onEnter, personId, timeSlot]);
 
   const handleMouseLeave = useCallback(() => {
@@ -22,8 +22,8 @@ function TimeSlotCell({
   }, []);
 
   const handleCellMouseDown = useCallback((e) => {
-    console.log(`Mouse Down Cell (${personId}, ${timeSlot}) - Calling onUpdateDirect`);
-    onUpdateDirect(personId, timeSlot);
+    console.log(`Mouse Down Cell (${personId}, ${timeSlot.display}) - Calling onUpdateDirect`);
+    onUpdateDirect(personId, timeSlot.value);
     // Prevent default behavior to avoid text selection during dragging
     e.preventDefault();
   }, [onUpdateDirect, personId, timeSlot]);
@@ -65,7 +65,7 @@ function TimeSlotCell({
       onMouseDown={handleCellMouseDown} 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      title={`${activity ? activity.name : 'Empty'} at ${timeSlot}`}
+      title={`${activity ? activity.name : 'Empty'} at ${timeSlot.display}`}
     >
       <span className="cell-activity-name">
         {activity && activity.id !== 'empty' ? activity.name : ''}
