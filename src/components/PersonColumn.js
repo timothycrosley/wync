@@ -135,7 +135,7 @@ function PersonColumn({
           )}
           <div className="summary-item unassigned-summary">
               <span className="summary-color" style={{ backgroundColor: '#eee' }}></span>
-              <span className="summary-name">Unassigned:</span>
+              <span className="summary-name">Free time:</span>
               <span className="summary-hours">{activitySummaries.unassignedHours}h</span>
           </div>
       </div>
