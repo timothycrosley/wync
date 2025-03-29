@@ -584,6 +584,13 @@ function App() {
 
   // Export all data to a JSON file
   const exportData = useCallback(() => {
+    // Prompt user for filename
+    const defaultFilename = `schedule_${new Date().toISOString().split('T')[0]}`;
+    const filename = prompt("Enter filename for export:", defaultFilename);
+    
+    // If user cancels or enters empty string, abort
+    if (!filename || !filename.trim()) return;
+    
     // Create a JSON object with all the application data
     const exportData = {
       people,
@@ -602,7 +609,13 @@ function App() {
     // Create a link element and trigger download
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `schedule_export_${new Date().toISOString().split('T')[0]}.json`;
+    
+    // Add .json extension if not already present
+    const filenameWithExtension = filename.trim().endsWith('.json') 
+      ? filename.trim() 
+      : `${filename.trim()}.json`;
+      
+    link.download = filenameWithExtension;
     
     // Append to the document, click to download, then remove
     document.body.appendChild(link);
