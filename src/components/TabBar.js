@@ -183,7 +183,7 @@ function TabBar({
           Clear Tab
         </button>
         <button className="tab-action-button" onClick={onDuplicateTab} title="Duplicate current tab">
-          Duplicate
+          Duplicate Tab
         </button>
         <button className="tab-action-button clear-all-button" onClick={onClearAllData} title="Clear all data including people, activities, and tabs">
           Clear All
