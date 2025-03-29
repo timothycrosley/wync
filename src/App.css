@@ -16,17 +16,19 @@ body {
 
 .App h1 {
     color: #333;
-    margin-bottom: 20px;
+    margin-bottom: 10px; /* Reduced from 20px */
 }
 
 .controls {
     display: flex;
     gap: 20px; /* Space between forms */
-    margin-bottom: 20px;
+    margin-bottom: 10px; /* Reduced from 20px */
     padding: 15px;
     background-color: #fff; /* White background for controls area */
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 95%;
+    max-width: 1400px;
 }
 
 .controls form {
@@ -92,8 +94,13 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     overflow: hidden; /* Keep this to contain children */
     /* Set a max height relative to viewport for scrolling */
-    height: calc(100vh - 150px); /* Changed from max-height to height */
+    height: calc(100vh - 200px); /* Adjusted for tab bar (was 150px) */
     min-height: 400px; /* Set minimum height */
+    transition: height 0.2s ease; /* Smooth transition when tab bar appears/disappears */
+    border-top: none; /* Remove top border */
+    border-top-left-radius: 0; /* Remove top-left radius */
+    border-top-right-radius: 0; /* Remove top-right radius */
+    margin-top: 0; /* Ensure no gap between tab bar and layout */
 }
 
 /* Style the palette (defined in ActivityPalette.css) within this container */
@@ -115,4 +122,15 @@ body {
 /* Remove the old App-header, App-logo etc. if they are still there */
 .App-header, .App-logo, .App-link {
     display: none;
+}
+
+/* Style for the tab bar to match the layout container width */
+.App .tab-bar {
+  width: 95%;
+  max-width: 1400px;
+  border: 1px solid #ccc;
+  border-radius: 5px 5px 0 0;
+  margin-bottom: 0; /* Override default margin */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  background-color: #f8f9fa;
 }

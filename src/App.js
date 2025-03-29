@@ -4,10 +4,12 @@ import ScheduleGrid from './components/ScheduleGrid';
 import ActivityPalette from './components/ActivityPalette';
 import AddPersonForm from './components/AddPersonForm';
 import AddActivityForm from './components/AddActivityForm';
+import TabBar from './components/TabBar';
 import { generateTimeSlots } from './utils/timeUtils'; // We'll create this util later
 
 const DEFAULT_COLOR = '#FFFFFF'; // White for empty slots
 const DEFAULT_ACTIVITIES = [{ id: 'empty', name: 'Empty', color: DEFAULT_COLOR }];
+const DEFAULT_TAB_NAME = 'Schedule';
 
 // Function to generate random colors (we might improve this later)
 const getRandomColor = () => {
@@ -40,10 +42,34 @@ function App() {
         ...parsedActivities.filter(a => a.id !== 'empty')
     ];
   });
+  
+  // Tabs state
+  const [tabs, setTabs] = useState(() => {
+    const savedTabs = localStorage.getItem('scheduleAppTabs');
+    return savedTabs ? JSON.parse(savedTabs) : [
+      { id: 'default', name: DEFAULT_TAB_NAME }
+    ];
+  });
+  
+  const [activeTabId, setActiveTabId] = useState(() => {
+    const savedActiveTabId = localStorage.getItem('scheduleAppActiveTabId');
+    return savedActiveTabId || 'default';
+  });
 
-  const [schedule, setSchedule] = useState(() => {
-    const savedSchedule = localStorage.getItem('scheduleAppSchedule');
-    return savedSchedule ? JSON.parse(savedSchedule) : {};
+  // Multi-schedule state
+  const [schedules, setSchedules] = useState(() => {
+    const savedSchedules = localStorage.getItem('scheduleAppSchedules');
+    if (savedSchedules) {
+      return JSON.parse(savedSchedules);
+    }
+    
+    // Check if there's a legacy single schedule to migrate
+    const legacySchedule = localStorage.getItem('scheduleAppSchedule');
+    if (legacySchedule) {
+      return { 'default': JSON.parse(legacySchedule) };
+    }
+    
+    return { 'default': {} };
   });
 
   const [selectedActivityId, setSelectedActivityId] = useState('empty');
@@ -72,8 +98,6 @@ function App() {
     };
   }, []);
 
-  // Effect to load data from Local Storage on mount (already done in useState initializers)
-
   // Effect to save data to Local Storage whenever it changes
   useEffect(() => {
     localStorage.setItem('scheduleAppPeople', JSON.stringify(people));
@@ -84,53 +108,128 @@ function App() {
     const activitiesToSave = activities.filter(a => a.id !== 'empty');
     localStorage.setItem('scheduleAppActivities', JSON.stringify(activitiesToSave));
   }, [activities]);
-
+  
   useEffect(() => {
-    localStorage.setItem('scheduleAppSchedule', JSON.stringify(schedule));
-  }, [schedule]);
+    localStorage.setItem('scheduleAppTabs', JSON.stringify(tabs));
+  }, [tabs]);
+  
+  useEffect(() => {
+    localStorage.setItem('scheduleAppActiveTabId', activeTabId);
+  }, [activeTabId]);
+  
+  useEffect(() => {
+    localStorage.setItem('scheduleAppSchedules', JSON.stringify(schedules));
+  }, [schedules]);
 
   // Initialize schedule for new people
   useEffect(() => {
-    setSchedule(prevSchedule => {
-      const newSchedule = { ...prevSchedule };
-      let scheduleUpdated = false;
-      people.forEach(person => {
-        if (!newSchedule[person.id]) {
-          newSchedule[person.id] = {};
-          timeSlots.forEach(slot => {
-            newSchedule[person.id][slot] = 'empty'; // Default to 'empty' activity
-          });
-          scheduleUpdated = true;
-        } else {
-          // Ensure all current timeslots exist for the person
-          timeSlots.forEach(slot => {
-            if (newSchedule[person.id][slot] === undefined) {
-                newSchedule[person.id][slot] = 'empty';
+    setSchedules(prevSchedules => {
+      const newSchedules = { ...prevSchedules };
+      let schedulesUpdated = false;
+      
+      // Update each tab's schedule
+      Object.keys(newSchedules).forEach(tabId => {
+        const schedule = newSchedules[tabId] || {};
+        let scheduleUpdated = false;
+        
+        people.forEach(person => {
+          if (!schedule[person.id]) {
+            schedule[person.id] = {};
+            timeSlots.forEach(slot => {
+              schedule[person.id][slot] = 'empty'; // Default to 'empty' activity
+            });
+            scheduleUpdated = true;
+          } else {
+            // Ensure all current timeslots exist for the person
+            timeSlots.forEach(slot => {
+              if (schedule[person.id][slot] === undefined) {
+                schedule[person.id][slot] = 'empty';
                 scheduleUpdated = true;
-            }
-          });
-           // Clean up old timeslots no longer in use (optional)
-           Object.keys(newSchedule[person.id]).forEach(existingSlot => {
-               if (!timeSlots.includes(existingSlot)) {
-                   delete newSchedule[person.id][existingSlot];
-                   scheduleUpdated = true;
-               }
-           });
+              }
+            });
+            // Clean up old timeslots no longer in use (optional)
+            Object.keys(schedule[person.id]).forEach(existingSlot => {
+              if (!timeSlots.includes(existingSlot)) {
+                delete schedule[person.id][existingSlot];
+                scheduleUpdated = true;
+              }
+            });
+          }
+        });
+        
+        // Clean up schedule entries for people who no longer exist (optional)
+        Object.keys(schedule).forEach(personId => {
+          if (!people.some(p => p.id === personId)) {
+            delete schedule[personId];
+            scheduleUpdated = true;
+          }
+        });
+        
+        if (scheduleUpdated) {
+          newSchedules[tabId] = schedule;
+          schedulesUpdated = true;
         }
       });
-       // Clean up schedule entries for people who no longer exist (optional)
-       Object.keys(newSchedule).forEach(personId => {
-           if (!people.some(p => p.id === personId)) {
-               delete newSchedule[personId];
-               scheduleUpdated = true;
-           }
-       });
 
-      return scheduleUpdated ? newSchedule : prevSchedule;
+      return schedulesUpdated ? newSchedules : prevSchedules;
     });
-  }, [people, timeSlots]); // Rerun if people or timeSlots change
+  }, [people, timeSlots, tabs]); // Rerun if people, timeSlots, or tabs change
 
-  // Handlers
+  // Get current schedule for active tab
+  const getCurrentSchedule = () => {
+    return schedules[activeTabId] || {};
+  };
+
+  // Handlers for tabs
+  const handleAddTab = () => {
+    const newTabId = `tab_${Date.now()}`;
+    const newTabName = `${DEFAULT_TAB_NAME} ${tabs.length + 1}`;
+    
+    // Add new tab
+    setTabs(prevTabs => [...prevTabs, { id: newTabId, name: newTabName }]);
+    
+    // Create new schedule based on the current active tab's schedule
+    setSchedules(prevSchedules => ({
+      ...prevSchedules,
+      [newTabId]: JSON.parse(JSON.stringify(prevSchedules[activeTabId] || {}))
+    }));
+    
+    // Set the new tab as active
+    setActiveTabId(newTabId);
+  };
+  
+  const handleRemoveTab = (tabId) => {
+    if (tabs.length <= 1) return; // Don't remove the last tab
+    
+    if (window.confirm("Are you sure you want to remove this schedule tab?")) {
+      // If removing the active tab, switch to another tab
+      if (tabId === activeTabId) {
+        const tabIndex = tabs.findIndex(tab => tab.id === tabId);
+        const newActiveIndex = tabIndex === 0 ? 1 : tabIndex - 1;
+        setActiveTabId(tabs[newActiveIndex].id);
+      }
+      
+      // Remove tab
+      setTabs(prevTabs => prevTabs.filter(tab => tab.id !== tabId));
+      
+      // Remove schedule
+      setSchedules(prevSchedules => {
+        const newSchedules = { ...prevSchedules };
+        delete newSchedules[tabId];
+        return newSchedules;
+      });
+    }
+  };
+  
+  const handleRenameTab = (tabId, newName) => {
+    setTabs(prevTabs => 
+      prevTabs.map(tab => 
+        tab.id === tabId ? { ...tab, name: newName } : tab
+      )
+    );
+  };
+
+  // Handlers for people and activities
   const addPerson = (name) => {
     if (name && !people.some(p => p.name === name)) {
       const newPerson = { id: Date.now().toString(), name }; // Simple ID generation
@@ -150,14 +249,19 @@ function App() {
   };
 
   const removePerson = (personIdToRemove) => {
-    if (window.confirm("Are you sure you want to remove this person and their schedule?")) {
+    if (window.confirm("Are you sure you want to remove this person from all schedules?")) {
         // Remove from people state
         setPeople(prevPeople => prevPeople.filter(p => p.id !== personIdToRemove));
-        // Remove from schedule state
-        setSchedule(prevSchedule => {
-            const newSchedule = { ...prevSchedule };
-            delete newSchedule[personIdToRemove];
-            return newSchedule;
+        
+        // Remove from all schedules
+        setSchedules(prevSchedules => {
+          const newSchedules = { ...prevSchedules };
+          Object.keys(newSchedules).forEach(tabId => {
+            if (newSchedules[tabId][personIdToRemove]) {
+              delete newSchedules[tabId][personIdToRemove];
+            }
+          });
+          return newSchedules;
         });
     }
   };
@@ -166,7 +270,7 @@ function App() {
      // Prevent removing the default 'empty' activity
      if (activityIdToRemove === 'empty') return;
 
-     if (window.confirm("Are you sure you want to remove this activity? It will be cleared from the schedule.")) {
+     if (window.confirm("Are you sure you want to remove this activity? It will be cleared from all schedules.")) {
         // Remove from activities state
         setActivities(prevActivities => prevActivities.filter(a => a.id !== activityIdToRemove));
         
@@ -175,17 +279,20 @@ function App() {
             setSelectedActivityId('empty');
         }
 
-        // Update schedule: replace removed activityId with 'empty'
-        setSchedule(prevSchedule => {
-            const newSchedule = { ...prevSchedule };
-            Object.keys(newSchedule).forEach(personId => {
-                Object.keys(newSchedule[personId]).forEach(timeSlot => {
-                    if (newSchedule[personId][timeSlot] === activityIdToRemove) {
-                        newSchedule[personId][timeSlot] = 'empty';
-                    }
-                });
+        // Update all schedules: replace removed activityId with 'empty'
+        setSchedules(prevSchedules => {
+          const newSchedules = { ...prevSchedules };
+          Object.keys(newSchedules).forEach(tabId => {
+            const schedule = newSchedules[tabId];
+            Object.keys(schedule).forEach(personId => {
+              Object.keys(schedule[personId]).forEach(timeSlot => {
+                if (schedule[personId][timeSlot] === activityIdToRemove) {
+                  schedule[personId][timeSlot] = 'empty';
+                }
+              });
             });
-            return newSchedule;
+          });
+          return newSchedules;
         });
      }
   };
@@ -194,9 +301,15 @@ function App() {
       if (window.confirm("Are you sure you want to clear all people, activities, and schedule data?")) {
           setPeople([]);
           setActivities([...DEFAULT_ACTIVITIES]); // Reset to just the default 'empty'
-          setSchedule({});
+          
+          // Reset to a single default tab
+          setTabs([{ id: 'default', name: DEFAULT_TAB_NAME }]);
+          setActiveTabId('default');
+          
+          // Clear all schedules
+          setSchedules({ 'default': {} });
+          
           setSelectedActivityId('empty');
-          // Local storage will be updated by the useEffect hooks
       }
   };
 
@@ -217,30 +330,36 @@ function App() {
     );
   }, []); // No dependencies needed as setActivities is stable
 
-  // Function to update schedule state
+  // Function to update schedule state for current tab
   const updateScheduleForCell = useCallback((personId, timeSlot) => {
-    setSchedule(prevSchedule => {
-      if (prevSchedule[personId]?.[timeSlot] === selectedActivityId) {
-        return prevSchedule;
+    setSchedules(prevSchedules => {
+      const currentSchedule = prevSchedules[activeTabId] || {};
+      if (currentSchedule[personId]?.[timeSlot] === selectedActivityId) {
+        return prevSchedules;
       }
-      console.log(`   Updating schedule for (${personId}, ${timeSlot}) [via updateScheduleForCell]`);
-      const newSchedule = {
-        ...prevSchedule,
+      
+      console.log(`   Updating schedule for (${personId}, ${timeSlot}) in tab ${activeTabId}`);
+      const updatedSchedule = {
+        ...currentSchedule,
         [personId]: {
-          ...(prevSchedule[personId] || {}),
+          ...(currentSchedule[personId] || {}),
           [timeSlot]: selectedActivityId,
         },
       };
-      return newSchedule;
+      
+      return {
+        ...prevSchedules,
+        [activeTabId]: updatedSchedule
+      };
     });
-  }, [selectedActivityId]);
+  }, [activeTabId, selectedActivityId]);
 
-  // Keep handleCellEnter (unused for now, but might be revisited)
+  // Mouse drag handler
   const handleCellEnter = useCallback((personId, timeSlot) => {
       console.log(`   Cell Entered (${personId}, ${timeSlot}) - checking ref`);
       if (isMouseDownRef.current) { 
           console.log(`   --> Mouse is down, calling updateScheduleForCell`);
-          updateScheduleForCell(personId, timeSlot); // Activate this line
+          updateScheduleForCell(personId, timeSlot);
       } else {
           console.log(`   --> Mouse is up, update blocked`);
       }
@@ -259,6 +378,14 @@ function App() {
           <AddActivityForm onAddActivity={addActivity} />
           <button onClick={clearAllData} className="clear-button">Clear All Data</button>
       </div>
+      <TabBar
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onTabSelect={setActiveTabId}
+        onAddTab={handleAddTab}
+        onRemoveTab={handleRemoveTab}
+        onRenameTab={handleRenameTab}
+      />
       <div className="layout-container">
           <ActivityPalette
               activities={activities}
@@ -270,15 +397,12 @@ function App() {
           <ScheduleGrid
               people={people}
               timeSlots={timeSlots}
-              schedule={schedule}
+              schedule={getCurrentSchedule()}
               activities={activities}
-              // Pass direct update function
-              onCellUpdateDirect={updateScheduleForCell} 
-              // Pass (currently unused) enter handler
-              onCellEnter={handleCellEnter} 
+              onCellUpdateDirect={updateScheduleForCell}
+              onCellEnter={handleCellEnter}
               selectedActivityColor={getSelectedActivityColor()}
               onRemovePerson={removePerson}
-              // REMOVED grid handlers
           />
       </div>
     </div>
