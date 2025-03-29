@@ -188,6 +188,10 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
         onClick={() => onSelectActivity('empty')}
         style={{ color: '#333' }}
       >
+        <span className="eraser-icon">
+          {/* Better eraser symbol */}
+          &#x232B;
+        </span>
         Clear Cell
       </div>
       {/* Display other activities with remove buttons */}
