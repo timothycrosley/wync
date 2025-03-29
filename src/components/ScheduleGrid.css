@@ -2,6 +2,17 @@
   flex-grow: 1; /* Allow grid to take remaining space */
   overflow: auto; /* Enable both vertical and horizontal scrolling */
   height: 100%; /* Take full height of parent container */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.grid-aligned {
+  width: 100%;
+  min-width: max-content;
+}
+
+.column-aligned {
+  height: 100%;
 }
 
 .schedule-grid {
@@ -50,18 +61,18 @@
 }
 
 .time-slot-label {
-  padding: 0 8px; /* Adjust padding */
+  padding: 0 8px;
   text-align: center;
   border-bottom: 1px solid #eee;
   font-size: 0.9em;
   color: #555;
-  height: 31px; /* Fixed exact height */
-  min-height: 31px;
-  max-height: 31px;
-  line-height: 30px; /* Vertically center text */
+  height: 30px; /* Match new cell height */
+  min-height: 30px;
+  max-height: 30px;
+  line-height: 30px;
   white-space: nowrap;
-  min-width: 90px; /* Ensure enough width for AM/PM time format */
-  box-sizing: border-box; /* Include padding in height calculation */
+  min-width: 90px;
+  box-sizing: border-box;
 }
 
 /* Remove bottom border from last time slot label */

@@ -2,7 +2,9 @@
   display: flex;
   flex-direction: column;
   border-right: 1px solid #ccc;
-  min-width: 150px; /* Minimum width for a person column */
+  min-width: 100px; /* Reduced minimum width */
+  max-width: 200px; /* Added maximum width */
+  width: 150px; /* Default width */
   flex: 1 0 auto; /* Grow but don't shrink */
 }
 

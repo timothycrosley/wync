@@ -8,10 +8,13 @@ body {
 .App {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center content horizontally */
-  padding: 15px; /* Reduced padding */
-  height: 100vh; /* Use full viewport height */
-  box-sizing: border-box; /* Include padding in height calculation */
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  padding: 8px;
+  box-sizing: border-box;
+  align-items: stretch;
+  width: 100%;
 }
 
 .App h1 {
@@ -21,14 +24,14 @@ body {
 
 .controls {
     display: flex;
-    gap: 20px; /* Space between forms */
-    margin-bottom: 10px; /* Reduced from 20px */
-    padding: 15px;
-    background-color: #fff; /* White background for controls area */
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    padding: 10px;
+    background-color: #fff;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    width: 95%;
-    max-width: 1400px;
+    width: 100%;
 }
 
 .controls form {
@@ -84,23 +87,22 @@ body {
     opacity: 1;
 }
 
-.layout-container { /* Renamed from .main-content */
+.layout-container {
     display: flex;
-    width: 95%;
-    max-width: 1400px;
+    width: 100%;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 0 0 5px 5px;
     background-color: #e9ecef;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden; /* Keep this to contain children */
-    /* Set a max height relative to viewport for scrolling */
-    height: calc(100vh - 200px); /* Adjusted for tab bar (was 150px) */
-    min-height: 400px; /* Set minimum height */
-    transition: height 0.2s ease; /* Smooth transition when tab bar appears/disappears */
-    border-top: none; /* Remove top border */
-    border-top-left-radius: 0; /* Remove top-left radius */
-    border-top-right-radius: 0; /* Remove top-right radius */
-    margin-top: 0; /* Ensure no gap between tab bar and layout */
+    overflow: hidden;
+    flex-grow: 1;
+    height: calc(100vh - 110px);
+    min-height: 400px;
+    transition: height 0.2s ease;
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-top: 0;
 }
 
 /* Style the palette (defined in ActivityPalette.css) within this container */
@@ -126,11 +128,10 @@ body {
 
 /* Style for the tab bar to match the layout container width */
 .App .tab-bar {
-  width: 95%;
-  max-width: 1400px;
+  width: 100%;
   border: 1px solid #ccc;
   border-radius: 5px 5px 0 0;
-  margin-bottom: 0; /* Override default margin */
+  margin-bottom: 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   background-color: #f8f9fa;
 }

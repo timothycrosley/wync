@@ -561,7 +561,6 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Day Schedule Sync</h1>
       <div className="controls">
           <AddPersonForm onAddPerson={addPerson} />
           <AddActivityForm onAddActivity={addActivity} />

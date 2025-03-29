@@ -1,7 +1,8 @@
 .time-slot-cell {
-  height: 31px; /* Fixed height - MUST match .time-slot-label */
-  min-height: 31px; /* Enforce minimum height */
-  max-height: 31px; /* Enforce maximum height */
+  height: 30px; /* Slightly reduced fixed height */
+  min-height: 30px;
+  max-height: 30px;
+  min-width: 80px; /* Minimum width */
   border-bottom: 1px solid #eee;
   /* Add a subtle left border for visual separation between people */
   border-left: 1px solid #eee;
