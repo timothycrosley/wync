@@ -51,27 +51,26 @@ function App() {
 
   const timeSlots = generateTimeSlots('00:00', '24:00', 30); // Full 24 hours, 30 min intervals
 
-  // Global mouse listeners effect
+  // Add mouse event handlers for the entire application
   useEffect(() => {
-    const handleGlobalMouseDown = () => {
-      console.log("GLOBAL MOUSE DOWN - Setting ref to true"); // --- DEBUG LOG --- 
+    const handleMouseDown = () => {
       isMouseDownRef.current = true;
     };
-    const handleGlobalMouseUp = () => {
-      console.log("GLOBAL MOUSE UP - Setting ref to false"); // --- DEBUG LOG --- 
+
+    const handleMouseUp = () => {
       isMouseDownRef.current = false;
     };
-
-    window.addEventListener('mousedown', handleGlobalMouseDown);
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-
-    // Cleanup function
+    
+    // Add event listeners to the window
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+    
+    // Cleanup on unmount
     return () => {
-      console.log("Removing window listeners");
-      window.removeEventListener('mousedown', handleGlobalMouseDown);
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, []); // Empty dependency array ensures this runs only on mount and unmount
+  }, []);
 
   // Effect to load data from Local Storage on mount (already done in useState initializers)
 
@@ -218,36 +217,34 @@ function App() {
     );
   }, []); // No dependencies needed as setActivities is stable
 
-  const updateCell = useCallback((personId, timeSlot, checkMouseDown = false) => {
-    console.log(`   updateCell (${personId}, ${timeSlot}): checkMouseDown=${checkMouseDown}, isMouseDownRef.current=${isMouseDownRef.current}`); 
-    if (checkMouseDown && !isMouseDownRef.current) {
-        console.log(`   Update blocked for (${personId}, ${timeSlot}) - ref is false`);
-        return;
-    }
-    // Defer the state update slightly to prevent interfering with mouseup event detection
-    setTimeout(() => {
-      setSchedule(prevSchedule => {
-        // Check if the cell already has the target activity (important inside timeout)
-        if (prevSchedule[personId]?.[timeSlot] === selectedActivityId) {
-          return prevSchedule;
-        }
-        console.log(`   Updating schedule for (${personId}, ${timeSlot}) [via setTimeout]`);
-        const newSchedule = {
-          ...prevSchedule,
-          [personId]: {
-            ...(prevSchedule[personId] || {}),
-            [timeSlot]: selectedActivityId,
-          },
-        };
-        return newSchedule;
-      });
-    }, 0); // Timeout of 0 ms defers execution until after current event loop cycle
-  }, [selectedActivityId, isMouseDownRef]);
+  // Function to update schedule state
+  const updateScheduleForCell = useCallback((personId, timeSlot) => {
+    setSchedule(prevSchedule => {
+      if (prevSchedule[personId]?.[timeSlot] === selectedActivityId) {
+        return prevSchedule;
+      }
+      console.log(`   Updating schedule for (${personId}, ${timeSlot}) [via updateScheduleForCell]`);
+      const newSchedule = {
+        ...prevSchedule,
+        [personId]: {
+          ...(prevSchedule[personId] || {}),
+          [timeSlot]: selectedActivityId,
+        },
+      };
+      return newSchedule;
+    });
+  }, [selectedActivityId]);
 
+  // Keep handleCellEnter (unused for now, but might be revisited)
   const handleCellEnter = useCallback((personId, timeSlot) => {
-      console.log(`   Cell Entered (${personId}, ${timeSlot}) - calling updateCell with check`);
-      updateCell(personId, timeSlot, true);
-  }, [updateCell]);
+      console.log(`   Cell Entered (${personId}, ${timeSlot}) - checking ref`);
+      if (isMouseDownRef.current) { 
+          console.log(`   --> Mouse is down, calling updateScheduleForCell`);
+          updateScheduleForCell(personId, timeSlot); // Activate this line
+      } else {
+          console.log(`   --> Mouse is up, update blocked`);
+      }
+  }, [isMouseDownRef, updateScheduleForCell]);
 
   const getSelectedActivityColor = () => {
       const activity = activities.find(a => a.id === selectedActivityId);
@@ -275,10 +272,13 @@ function App() {
               timeSlots={timeSlots}
               schedule={schedule}
               activities={activities}
-              onCellUpdate={updateCell}
-              onCellEnter={handleCellEnter}
+              // Pass direct update function
+              onCellUpdateDirect={updateScheduleForCell} 
+              // Pass (currently unused) enter handler
+              onCellEnter={handleCellEnter} 
               selectedActivityColor={getSelectedActivityColor()}
               onRemovePerson={removePerson}
+              // REMOVED grid handlers
           />
       </div>
     </div>

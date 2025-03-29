@@ -4,7 +4,7 @@ import './PersonColumn.css'; // Create CSS next
 
 const TIME_INTERVAL_MINUTES = 30; // Assuming 30 min intervals as set in App.js
 
-function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpdate, onCellEnter, selectedActivityColor, onRemovePerson }) {
+function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpdateDirect, onCellEnter, selectedActivityColor, onRemovePerson }) {
 
   // Calculate summaries
   const activitySummaries = useMemo(() => {
@@ -75,7 +75,7 @@ function PersonColumn({ person, timeSlots, schedule, getActivityById, onCellUpda
             timeSlot={slot}
             personId={person.id}
             activity={activity}
-            onUpdate={onCellUpdate}
+            onUpdateDirect={onCellUpdateDirect}
             onEnter={onCellEnter}
             selectedActivityColor={selectedActivityColor}
           />

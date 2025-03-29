@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PersonColumn from './PersonColumn';
 import './ScheduleGrid.css'; // We'll create this CSS file next
 
@@ -7,26 +7,34 @@ function ScheduleGrid({
   timeSlots, 
   schedule, 
   activities, 
-  onCellUpdate, // Renamed prop 
-  onCellEnter, // Add new prop
+  onCellUpdateDirect,
+  onCellEnter,
   selectedActivityColor, 
-  onRemovePerson // Add new prop
+  onRemovePerson
 }) {
 
-  // Find the activity object based on its ID
-  const getActivityById = (id) => {
-    return activities.find(a => a.id === id);
-  };
+  const getActivityById = useCallback((id) => {
+    return activities.find(a => a.id === id) || { id: 'empty', name: 'Empty', color: '#FFFFFF' };
+  }, [activities]);
 
   // Prevent default drag behavior which can interfere
   const handleDragStart = (e) => {
     e.preventDefault();
+    return false;
+  }
+
+  // Prevent text selection during drag
+  const handleSelectStart = (e) => {
+    e.preventDefault();
+    return false;
   }
 
   return (
     <div 
       className="schedule-grid-container"
       onDragStart={handleDragStart}
+      onSelectStart={handleSelectStart}
+      onMouseDown={(e) => e.preventDefault()}
     >
         <div className="schedule-grid">
             {/* Time Slot Labels Column */}
@@ -46,10 +54,10 @@ function ScheduleGrid({
                     timeSlots={timeSlots}
                     schedule={schedule[person.id] || {}}
                     getActivityById={getActivityById}
-                    onCellUpdate={onCellUpdate} // Pass down renamed prop
-                    onCellEnter={onCellEnter} // Pass down new handler
+                    onCellUpdateDirect={onCellUpdateDirect}
+                    onCellEnter={onCellEnter}
                     selectedActivityColor={selectedActivityColor}
-                    onRemovePerson={onRemovePerson} // Pass down handler
+                    onRemovePerson={onRemovePerson}
                 />
             ))}
         </div>

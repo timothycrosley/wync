@@ -15,6 +15,10 @@
   padding: 0 4px; /* Small padding */
   text-align: center;
   overflow: hidden; /* Prevent text overflow */
+  user-select: none; /* Prevent text selection during drag */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Remove left border from the very first column of cells (time labels don't need it) */
@@ -37,6 +41,13 @@
      background-color: var(--selected-activity-color, #ffffff) !important; /* Use fallback just in case */
      outline: 1px solid rgba(0, 0, 0, 0.4); /* Slightly stronger outline */
      z-index: 1;
+}
+
+/* Style for active cells during drag operation */
+.schedule-grid-container:active .time-slot-cell:hover {
+   background-color: var(--selected-activity-color, #ffffff) !important;
+   outline: 2px solid rgba(0, 0, 0, 0.6); /* Stronger outline for active drag */
+   transition: outline 0.05s ease-in-out;
 }
 
 .cell-activity-name {

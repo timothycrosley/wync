@@ -5,34 +5,28 @@ function TimeSlotCell({
   timeSlot, 
   personId, 
   activity, 
-  onUpdate, // Renamed prop
-  onEnter, // Use new prop from PersonColumn
-  selectedActivityColor, 
-  // isMouseDown, // Removed prop
-  // onCellMouseDown // Remove prop 
+  onUpdateDirect, 
+  onEnter, 
+  selectedActivityColor 
 }) {
   const [isHoveringLocal, setIsHoveringLocal] = useState(false);
 
-  // Handler when mouse enters this specific cell
-  const handleMouseEnter = () => {
+  const handleMouseEnter = useCallback(() => {
     setIsHoveringLocal(true);
-    // Directly call the onEnter handler passed from App (via parents)
-    // This handler will check the ref in App.js
-    console.log(`Mouse Enter Cell (${personId}, ${timeSlot}) - Calling onEnter`); // --- DEBUG LOG --- 
+    console.log(`Mouse Enter Cell (${personId}, ${timeSlot}) - Calling onEnter`);
     onEnter(personId, timeSlot);
-  };
+  }, [onEnter, personId, timeSlot]);
 
-  // Handler when mouse leaves this specific cell
   const handleMouseLeave = useCallback(() => {
     setIsHoveringLocal(false);
   }, []);
 
-  // Handler for mouse down specifically on this cell (for single click update)
-  const handleCellMouseDown = useCallback(() => {
-    // Directly update this cell when clicked.
-    // The global listener in App.js handles setting the isMouseDownRef for drag purposes.
-    onUpdate(personId, timeSlot); 
-  }, [onUpdate, personId, timeSlot]); // Reverted dependencies
+  const handleCellMouseDown = useCallback((e) => {
+    console.log(`Mouse Down Cell (${personId}, ${timeSlot}) - Calling onUpdateDirect`);
+    onUpdateDirect(personId, timeSlot);
+    // Prevent default behavior to avoid text selection during dragging
+    e.preventDefault();
+  }, [onUpdateDirect, personId, timeSlot]);
 
   const cellStyle = {
     // Base background is the assigned activity color (or white for empty)
@@ -63,18 +57,16 @@ function TimeSlotCell({
   return (
     <div
       className={cellClassName}
-      // Add the selected color as a CSS custom property for hover effect
       style={{ 
         ...cellStyle, 
         '--selected-activity-color': selectedActivityColor,
-        color: textColor // Set text color dynamically
+        color: textColor 
        }}
-      onMouseDown={handleCellMouseDown} // Keeping handler, reverted logic
+      onMouseDown={handleCellMouseDown} 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       title={`${activity ? activity.name : 'Empty'} at ${timeSlot}`}
     >
-      {/* Display activity name if not empty */} 
       <span className="cell-activity-name">
         {activity && activity.id !== 'empty' ? activity.name : ''}
       </span>
@@ -82,9 +74,4 @@ function TimeSlotCell({
   );
 }
 
-// Memoize the component to prevent unnecessary re-renders during drag, 
-// especially as isMouseDown state changes frequently at the App level.
-// Only re-render if the cell's own data (activity, selected color, etc.) changes.
-export default React.memo(TimeSlotCell); // Restore memoization
-
-// export default TimeSlotCell; // Export directly
+export default React.memo(TimeSlotCell);
