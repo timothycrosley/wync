@@ -45,6 +45,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   user-select: none;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 .tab:hover {
@@ -55,6 +56,28 @@
   background-color: #fff;
   border-bottom: 2px solid #007bff;
   font-weight: 500;
+}
+
+/* Dragging styles */
+.tab.dragging {
+  opacity: 0.4;
+  z-index: 10;
+}
+
+.tab.drag-over {
+  background-color: #c8e1ff;
+  border-left: 2px solid #007bff;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Show grab cursor when tab is draggable */
+.tab:not(.active):hover {
+  cursor: grab;
+}
+
+.tab:active {
+  cursor: grabbing;
 }
 
 .tab-name {

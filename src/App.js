@@ -577,6 +577,11 @@ function App() {
     return schedules[activeTabId];
   }, [activeTabId, schedules]);
 
+  // Handle tab reordering from drag and drop
+  const handleReorderTabs = useCallback((newTabsOrder) => {
+    setTabs(newTabsOrder);
+  }, []);
+
   return (
     <div className="App">
       <div className="controls">
@@ -593,6 +598,7 @@ function App() {
         onRenameTab={handleRenameTab}
         onClearTab={() => clearTab()}
         onDuplicateTab={duplicateTab}
+        onReorderTabs={handleReorderTabs}
       />
       <div className="layout-container">
           <ActivityPalette
