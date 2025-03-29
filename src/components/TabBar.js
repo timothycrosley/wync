@@ -131,6 +131,9 @@ function TabBar({
 
   return (
     <div className="tab-bar">
+      <button className="add-tab-button" onClick={onAddTab} title="Add new tab">
+        +
+      </button>
       <div className="tabs-container">
         {tabs.map((tab) => (
           <div
@@ -176,17 +179,14 @@ function TabBar({
         ))}
       </div>
       <div className="tab-actions">
-        <button className="tab-action-button clear-all-button" onClick={onClearAllData} title="Clear all data including people, activities, and tabs">
-          Clear All
-        </button>
         <button className="tab-action-button" onClick={onClearTab} title="Clear current tab">
           Clear Tab
         </button>
         <button className="tab-action-button" onClick={onDuplicateTab} title="Duplicate current tab">
           Duplicate
         </button>
-        <button className="add-tab-button" onClick={onAddTab} title="Add new tab">
-          +
+        <button className="tab-action-button clear-all-button" onClick={onClearAllData} title="Clear all data including people, activities, and tabs">
+          Clear All
         </button>
       </div>
     </div>

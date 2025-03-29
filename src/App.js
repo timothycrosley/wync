@@ -584,18 +584,6 @@ function App() {
 
   return (
     <div className="App">
-      <TabBar
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onTabSelect={handleTabSelect}
-        onAddTab={handleAddTab}
-        onRemoveTab={handleRemoveTab}
-        onRenameTab={handleRenameTab}
-        onClearTab={() => clearTab()}
-        onDuplicateTab={duplicateTab}
-        onReorderTabs={handleReorderTabs}
-        onClearAllData={clearAllData}
-      />
       <div className="layout-container">
           <ActivityPalette
               activities={activities}
@@ -628,6 +616,18 @@ function App() {
             ))}
           </div>
       </div>
+      <TabBar
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onTabSelect={handleTabSelect}
+        onAddTab={handleAddTab}
+        onRemoveTab={handleRemoveTab}
+        onRenameTab={handleRenameTab}
+        onClearTab={() => clearTab()}
+        onDuplicateTab={duplicateTab}
+        onReorderTabs={handleReorderTabs}
+        onClearAllData={clearAllData}
+      />
     </div>
   );
 }
