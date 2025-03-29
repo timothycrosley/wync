@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { SketchPicker } from 'react-color'; // Import the color picker
 import './ActivityPalette.css'; // We'll create this CSS file next
 
@@ -32,10 +32,42 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
   // State to manage which color picker is open { activityId: string | null }
   const [pickerActivityId, setPickerActivityId] = useState(null);
   
+  // State for renaming activities
+  const [editingActivityId, setEditingActivityId] = useState(null);
+  const [newActivityName, setNewActivityName] = useState('');
+  
   // Ref to store the long press timer
   const longPressTimerRef = useRef(null);
   // Ref to prevent click after long press opens picker
   const didLongPressRef = useRef(false); 
+
+  // State for the long press progress
+  const [longPressProgress, setLongPressProgress] = useState(null);
+  
+  // Effect to animate the long press progress
+  useEffect(() => {
+    if (longPressProgress !== null) {
+      // Add the long-press-active class to the body to trigger CSS animations
+      document.body.classList.add('long-press-active');
+      
+      // Clear the class when longPressProgress is null
+      return () => {
+        document.body.classList.remove('long-press-active');
+      };
+    }
+  }, [longPressProgress]);
+
+  // Define a function to update activity names
+  const onRenameActivity = useCallback((activityId, newName) => {
+    // Find the activity in the array
+    const activity = activities.find(a => a.id === activityId);
+    if (!activity) return;
+    
+    // Call onUpdateActivityColor with the same color to update the name
+    const updatedActivity = { ...activity, name: newName };
+    // We need to access the activity's color but keep the name change
+    onUpdateActivityColor(activityId, activity.color, newName);
+  }, [activities, onUpdateActivityColor]);
 
   const handleRemoveClick = (e, activityId) => {
     e.stopPropagation(); // Prevent selecting the activity when clicking remove
@@ -46,16 +78,35 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
 
   // --- Long Press Handlers --- 
   const handleMouseDown = useCallback((activityId) => {
+    // Ignore if we're in edit mode
+    if (editingActivityId) return;
+    
     didLongPressRef.current = false; // Reset flag
     clearTimeout(longPressTimerRef.current); // Clear any existing timer
+    
+    // Start showing the long press progress
+    setLongPressProgress(activityId);
+    
     longPressTimerRef.current = setTimeout(() => {
       didLongPressRef.current = true; // Set flag: long press occurred
-      setPickerActivityId(activityId); // Open the picker for this activity
+      
+      // Generate a random color first
+      const activity = activities.find(a => a.id === activityId);
+      if (activity) {
+        // Generate a random color and apply it
+        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+        onUpdateActivityColor(activityId, randomColor);
+      }
+      
+      // Then open the color picker to allow further customization
+      setPickerActivityId(activityId);
+      setLongPressProgress(null); // Hide progress indicator
     }, 500); // 500ms delay for long press
-  }, []);
+  }, [activities, editingActivityId, onUpdateActivityColor]);
 
   const clearLongPressTimer = useCallback(() => {
     clearTimeout(longPressTimerRef.current);
+    setLongPressProgress(null); // Hide progress indicator
   }, []);
 
   const handleMouseUp = useCallback((activityId) => {
@@ -76,6 +127,42 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
     // while picker is open (e.g., moving to picker itself)
   }, [clearLongPressTimer]);
   // --- End Long Press Handlers ---
+
+  // --- Rename Handlers ---
+  const handleDoubleClick = useCallback((e, activity) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    // Skip for 'empty' activity
+    if (activity.id === 'empty') return;
+    
+    setEditingActivityId(activity.id);
+    setNewActivityName(activity.name);
+  }, []);
+  
+  const handleNameChange = useCallback((e) => {
+    setNewActivityName(e.target.value);
+  }, []);
+  
+  const handleNameSave = useCallback(() => {
+    if (editingActivityId && newActivityName.trim()) {
+      onRenameActivity(editingActivityId, newActivityName.trim());
+    }
+    setEditingActivityId(null);
+  }, [editingActivityId, newActivityName, onRenameActivity]);
+  
+  const handleNameKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') {
+      handleNameSave();
+    } else if (e.key === 'Escape') {
+      setEditingActivityId(null);
+    }
+  }, [handleNameSave]);
+  
+  const handleNameBlur = useCallback(() => {
+    handleNameSave();
+  }, [handleNameSave]);
+  // --- End Rename Handlers ---
 
   // Handler for color picker changes
   const handleColorChangeComplete = useCallback((color, activityId) => {
@@ -115,18 +202,31 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
           >
             {/* Activity Item itself */}
             <div
-              className={`activity-item ${selectedActivityId === activity.id ? 'selected' : ''}`}
+              className={`activity-item ${selectedActivityId === activity.id ? 'selected' : ''} ${longPressProgress === activity.id ? 'long-press-in-progress' : ''}`}
               onMouseDown={() => handleMouseDown(activity.id)}
               onMouseUp={() => handleMouseUp(activity.id)}
               onMouseLeave={handleMouseLeave} 
-              onDoubleClick={() => onUpdateActivityColor(activity.id)} 
+              onDoubleClick={(e) => handleDoubleClick(e, activity)}
               style={{ 
                 backgroundColor: activity.color, 
                 color: textColor
               }}
-              title={`${activity.name} (Click=Select, DblClick=Random Color, LongPress=Choose Color)`}
+              title={`${activity.name} (Click=Select, DblClick=Rename, LongPress=Random Color & Picker)`}
             >
-              <span className="activity-name">{activity.name}</span>
+              {editingActivityId === activity.id ? (
+                <input
+                  type="text"
+                  value={newActivityName}
+                  onChange={handleNameChange}
+                  onKeyDown={handleNameKeyDown}
+                  onBlur={handleNameBlur}
+                  autoFocus
+                  className="activity-name-input"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <span className="activity-name">{activity.name}</span>
+              )}
               <button 
                 onClick={(e) => handleRemoveClick(e, activity.id)} 
                 className="remove-button activity-remove-button" 
@@ -161,7 +261,7 @@ function ActivityPalette({ activities, selectedActivityId, onSelectActivity, onR
           </div>
         )
       })}
-      <p className="palette-instructions">Click=Select. DblClick=Random Color. Long Press=Choose Color.</p> {/* Updated instructions */}
+      <p className="palette-instructions">Click=Select. DblClick=Rename. Long Press=Random Color & Picker.</p>
     </div>
   );
 }

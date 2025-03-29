@@ -457,8 +457,8 @@ function App() {
       }
   };
 
-  // Handler to update an activity's color (accepts optional newColor)
-  const updateActivityColor = useCallback((activityIdToUpdate, newColor = null) => {
+  // Handler to update an activity's color (accepts optional newColor and newName)
+  const updateActivityColor = useCallback((activityIdToUpdate, newColor = null, newName = null) => {
     // Don't update the 'empty' activity color
     if (activityIdToUpdate === 'empty') return;
 
@@ -468,7 +468,12 @@ function App() {
     setActivities(prevActivities => 
       prevActivities.map(activity => 
         activity.id === activityIdToUpdate 
-          ? { ...activity, color: finalColor } // Use finalColor
+          ? { 
+              ...activity, 
+              color: finalColor,
+              // Update name if provided
+              ...(newName !== null ? { name: newName } : {})
+            } 
           : activity
       )
     );
