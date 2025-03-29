@@ -91,7 +91,7 @@ body {
     display: flex;
     width: 100%;
     border: 1px solid #ccc;
-    border-radius: 5px 5px 0 0;
+    border-radius: 0 0 5px 5px;
     background-color: #e9ecef;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     overflow: hidden;
@@ -99,8 +99,8 @@ body {
     height: calc(100vh - 58px);
     min-height: 400px;
     transition: height 0.2s ease;
-    border-bottom: none;
-    margin-bottom: 0;
+    border-top: none;
+    margin-top: 0;
 }
 
 /* Style the palette (defined in ActivityPalette.css) within this container */
@@ -128,8 +128,8 @@ body {
 .App .tab-bar {
     width: 100%;
     border: 1px solid #ccc;
-    border-radius: 0 0 5px 5px;
-    margin-top: 0;
+    border-radius: 5px 5px 0 0;
+    margin-bottom: 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     background-color: #f8f9fa;
 }

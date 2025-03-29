@@ -1,10 +1,10 @@
 .tab-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Align to the top to allow tabs to extend downward */
   background-color: #f0f0f0;
-  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
   padding: 0 5px;
-  margin-top: 0;
+  margin-bottom: 0;
   height: 40px;
   width: 100%;
 }
@@ -47,11 +47,11 @@
   text-overflow: ellipsis;
   user-select: none;
   transition: background-color 0.2s, transform 0.1s;
-  /* Google Sheets style - bottom tab appearance */
-  border-bottom: none;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  margin-top: 4px; /* Lift active tab slightly */
+  /* Flip tabs so they connect at the top */
+  border-top: none;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  margin-bottom: 4px; /* Lift active tab slightly */
 }
 
 .tab:hover {
@@ -60,7 +60,7 @@
 
 .tab.active {
   background-color: #fff;
-  border-top: 2px solid #007bff;
+  border-bottom: 2px solid #007bff;
   height: calc(100% + 1px); /* Extend slightly into the container */
   font-weight: 500;
 }
