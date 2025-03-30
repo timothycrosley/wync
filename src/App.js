@@ -6,6 +6,7 @@ import AddPersonForm from './components/AddPersonForm';
 import AddActivityForm from './components/AddActivityForm';
 import TabBar from './components/TabBar';
 import TabContent from './components/TabContent';
+import InfoPopover from './components/InfoPopover';
 import { generateTimeSlots } from './utils/timeUtils'; // We'll create this util later
 
 const DEFAULT_COLOR = '#FFFFFF'; // White for empty slots
@@ -799,6 +800,9 @@ function App() {
         canUndo={historyIndex > 0}
         canRedo={historyIndex < history.length - 1}
       />
+      
+      {/* Info Popover */}
+      <InfoPopover />
     </div>
   );
 }
