@@ -16,7 +16,6 @@ function TimeSlotCell({
     setIsHoveringLocal(true);
     console.log(`Mouse Enter Cell (${personId}, ${timeSlot.display}) - Calling onEnter`);
     
-    // We now handle all Tab key logic in App.js through onEnter
     onEnter(personId, timeSlot.value);
   }, [onEnter, personId, timeSlot]);
 
@@ -32,11 +31,6 @@ function TimeSlotCell({
   }, [onUpdateDirect, personId, timeSlot]);
 
   const handleCellClick = useCallback((e) => {
-    // Skip if Tab key is pressed to avoid duplicate updates
-    if (document.body.classList.contains('tab-key-pressed')) {
-      return;
-    }
-    
     // In case of a regular click (not drag), call the onClick handler directly
     if (onClick) {
       onClick(personId, timeSlot.value);

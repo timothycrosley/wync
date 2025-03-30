@@ -93,9 +93,8 @@ function App() {
 
   const [selectedActivityId, setSelectedActivityId] = useState('empty');
   const isMouseDownRef = useRef(false);
-  const tabKeyPressedRef = useRef(false);
 
-  const timeSlots = generateTimeSlots('00:00', '24:00', 30); // Full 24 hours, 30 min intervals
+  const timeSlots = generateTimeSlots('00:00', '24:00', 30);
 
   // Add to history when state changes
   useEffect(() => {
@@ -187,23 +186,8 @@ function App() {
       isMouseDownRef.current = false;
     };
     
-    // Support for multi-selection with Tab key or Ctrl/Cmd key
+    // Support for keyboard shortcuts only
     const handleKeyDown = (e) => {
-      // Tab key or Ctrl/Cmd key for multi-selection
-      if (e.key === 'Tab' || e.key === 'Control' || e.key === 'Meta') {
-        // Only prevent default for Tab, as it would change focus
-        if (e.key === 'Tab') {
-          e.preventDefault();
-        }
-        tabKeyPressedRef.current = true;
-        document.body.classList.add('tab-key-pressed');
-      }
-      
-      // Escape key shortcut to select 'empty' activity
-      if (e.key === 'Escape' && tabKeyPressedRef.current) {
-        setSelectedActivityId('empty');
-      }
-
       // Undo: Ctrl+Z / Cmd+Z
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
@@ -217,35 +201,16 @@ function App() {
       }
     };
     
-    const handleKeyUp = (e) => {
-      if (e.key === 'Tab' || e.key === 'Control' || e.key === 'Meta') {
-        // Only prevent default for Tab, as it would change focus
-        if (e.key === 'Tab') {
-          e.preventDefault();
-        }
-        tabKeyPressedRef.current = false;
-        document.body.classList.remove('tab-key-pressed');
-        // Clear active cell indicators
-        const activeElements = document.querySelectorAll('.tab-key-active');
-        activeElements.forEach(el => {
-          el.classList.remove('tab-key-active');
-        });
-      }
-    };
-    
     // Add event listeners to the window
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
     
     // Cleanup on unmount
     return () => {
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      document.body.classList.remove('tab-key-pressed');
     };
   }, [handleUndo, handleRedo]);
 
@@ -640,21 +605,13 @@ function App() {
   // Mouse drag handler
   const handleCellEnter = useCallback((personId, timeSlot, specificTabId = null) => {
       console.log(`Cell Entered (${personId}, ${timeSlot}) - checking ref`);
-      if (isMouseDownRef.current || tabKeyPressedRef.current) { 
-          console.log(`Mouse is down or Tab is pressed, calling updateScheduleForCell`);
+      if (isMouseDownRef.current) { 
+          console.log(`Mouse is down, calling updateScheduleForCell`);
           updateScheduleForCell(personId, timeSlot, specificTabId);
-          
-          // Mark the cell as active when using Tab key
-          if (tabKeyPressedRef.current) {
-            const cell = document.querySelector(`.time-slot-cell[data-person-id="${personId}"][data-time-slot="${timeSlot}"]`);
-            if (cell) {
-              cell.classList.add('tab-key-active');
-            }
-          }
       } else {
           console.log(`Mouse is up, update blocked`);
       }
-  }, [isMouseDownRef, tabKeyPressedRef, updateScheduleForCell]);
+  }, [isMouseDownRef, updateScheduleForCell]);
 
   // Function to handle direct cell click (separate from drag)
   const handleCellClick = useCallback((personId, timeSlot, specificTabId = null) => {
