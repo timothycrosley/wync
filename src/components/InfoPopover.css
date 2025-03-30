@@ -1,0 +1,202 @@
+.info-button {
+  position: fixed;
+  bottom: 60px;
+  right: 30px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #4a90e2;
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: all 0.2s ease;
+}
+
+.info-button:hover {
+  background-color: #357abf;
+  transform: scale(1.05);
+}
+
+.info-popover-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  overflow: auto;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.info-popover {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 24px;
+  animation: slideUp 0.3s ease-out;
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: #f0f0f0;
+}
+
+.popover-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.app-logo {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 16px;
+}
+
+.app-name {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0 0 8px 0;
+  color: #4a90e2;
+}
+
+.app-slogan {
+  font-size: 18px;
+  margin: 0 0 24px 0;
+  color: #666;
+  font-style: italic;
+}
+
+.app-description {
+  text-align: left;
+  margin-bottom: 24px;
+  color: #333;
+  line-height: 1.6;
+  width: 100%;
+  max-width: 650px;
+}
+
+.app-description p {
+  margin-bottom: 16px;
+}
+
+.app-description ul {
+  margin: 16px 0;
+  padding-left: 24px;
+}
+
+.app-description li {
+  margin-bottom: 8px;
+}
+
+.dont-show-again {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dont-show-again label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.start-button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.start-button:hover {
+  background-color: #357abf;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .info-popover {
+    width: 95%;
+    padding: 20px;
+    max-width: 95%;
+  }
+  
+  .app-logo {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .app-name {
+    font-size: 28px;
+  }
+  
+  .app-slogan {
+    font-size: 16px;
+  }
+  
+  .app-description {
+    font-size: 14px;
+  }
+} 
