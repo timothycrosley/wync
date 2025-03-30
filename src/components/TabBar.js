@@ -13,7 +13,11 @@ function TabBar({
   onReorderTabs,
   onClearAllData,
   onExport,
-  onImport
+  onImport,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo
 }) {
   const [editingTabId, setEditingTabId] = useState(null);
   const [newTabName, setNewTabName] = useState('');

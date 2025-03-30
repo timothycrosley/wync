@@ -22,6 +22,9 @@ const getRandomColor = () => {
   return color;
 };
 
+// Maximum number of actions to keep in history
+const MAX_HISTORY_SIZE = 50;
+
 function App() {
   // State Initialization
   const [people, setPeople] = useState(() => {
@@ -82,11 +85,97 @@ function App() {
     return { 'default': {} };
   });
 
+  // Undo/Redo History State
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isUndoRedoAction, setIsUndoRedoAction] = useState(false);
+  const isActionInProgress = useRef(false);
+
   const [selectedActivityId, setSelectedActivityId] = useState('empty');
   const isMouseDownRef = useRef(false);
   const tabKeyPressedRef = useRef(false);
 
   const timeSlots = generateTimeSlots('00:00', '24:00', 30); // Full 24 hours, 30 min intervals
+
+  // Add to history when state changes
+  useEffect(() => {
+    // Skip if the change is from an undo/redo operation
+    if (isUndoRedoAction || isActionInProgress.current) {
+      setIsUndoRedoAction(false);
+      return;
+    }
+
+    // Create a snapshot of the current state
+    const snapshot = {
+      people: [...people],
+      activities: [...activities],
+      tabs: [...tabs],
+      schedules: JSON.parse(JSON.stringify(schedules)),
+      activeTabId
+    };
+
+    // If we're not at the end of history, truncate the future states
+    if (historyIndex < history.length - 1) {
+      setHistory(prev => [...prev.slice(0, historyIndex + 1), snapshot]);
+    } else {
+      // Otherwise just append to history
+      setHistory(prev => {
+        // Keep history under maximum size
+        const newHistory = [...prev, snapshot];
+        if (newHistory.length > MAX_HISTORY_SIZE) {
+          return newHistory.slice(newHistory.length - MAX_HISTORY_SIZE);
+        }
+        return newHistory;
+      });
+    }
+    setHistoryIndex(prev => Math.min(prev + 1, MAX_HISTORY_SIZE - 1));
+  }, [people, activities, tabs, schedules, activeTabId]);
+
+  // Undo function
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      isActionInProgress.current = true;
+      const prevState = history[historyIndex - 1];
+      
+      // Apply previous state
+      setPeople(prevState.people);
+      setActivities(prevState.activities);
+      setTabs(prevState.tabs);
+      setSchedules(prevState.schedules);
+      setActiveTabId(prevState.activeTabId);
+      
+      // Mark that we're undoing to prevent adding to history
+      setIsUndoRedoAction(true);
+      setHistoryIndex(prev => prev - 1);
+      
+      setTimeout(() => {
+        isActionInProgress.current = false;
+      }, 0);
+    }
+  }, [history, historyIndex]);
+
+  // Redo function
+  const handleRedo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      isActionInProgress.current = true;
+      const nextState = history[historyIndex + 1];
+      
+      // Apply next state
+      setPeople(nextState.people);
+      setActivities(nextState.activities);
+      setTabs(nextState.tabs);
+      setSchedules(nextState.schedules);
+      setActiveTabId(nextState.activeTabId);
+      
+      // Mark that we're redoing to prevent adding to history
+      setIsUndoRedoAction(true);
+      setHistoryIndex(prev => prev + 1);
+      
+      setTimeout(() => {
+        isActionInProgress.current = false;
+      }, 0);
+    }
+  }, [history, historyIndex]);
 
   // Add mouse event handlers for the entire application
   useEffect(() => {
@@ -113,6 +202,18 @@ function App() {
       // Escape key shortcut to select 'empty' activity
       if (e.key === 'Escape' && tabKeyPressedRef.current) {
         setSelectedActivityId('empty');
+      }
+
+      // Undo: Ctrl+Z / Cmd+Z
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+
+      // Redo: Ctrl+Shift+Z / Cmd+Shift+Z or Ctrl+Y / Cmd+Y
+      if ((e.ctrlKey || e.metaKey) && ((e.key === 'z' && e.shiftKey) || e.key === 'y')) {
+        e.preventDefault();
+        handleRedo();
       }
     };
     
@@ -146,7 +247,7 @@ function App() {
       window.removeEventListener('keyup', handleKeyUp);
       document.body.classList.remove('tab-key-pressed');
     };
-  }, []);
+  }, [handleUndo, handleRedo]);
 
   // Effect to save data to Local Storage whenever it changes
   useEffect(() => {
@@ -736,6 +837,10 @@ function App() {
         onClearAllData={clearAllData}
         onExport={exportData}
         onImport={handleImportClick}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={historyIndex > 0}
+        canRedo={historyIndex < history.length - 1}
       />
     </div>
   );
