@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/wync/static/css/main.6869614c.css",
+    "main.js": "/wync/static/js/main.b29c71dc.js",
+    "index.html": "/wync/index.html",
+    "main.6869614c.css.map": "/wync/static/css/main.6869614c.css.map",
+    "main.b29c71dc.js.map": "/wync/static/js/main.b29c71dc.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6869614c.css",
+    "static/js/main.b29c71dc.js"
+  ]
+}
