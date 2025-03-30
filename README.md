@@ -89,7 +89,7 @@ npm run deploy
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is open source and available under the [MIT License](LICENSE). Copyright (c) 2025 Timothy Crosley.
 
 ---
 
