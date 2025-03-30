@@ -1,70 +1,96 @@
-# Getting Started with Create React App
+# Wynk
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<p align="center">
+  <img src="public/logo512.png" alt="Wynk Logo" width="200" />
+</p>
 
-## Available Scripts
+<h3 align="center">The way We Sync!</h3>
 
-In the project directory, you can run:
+<p align="center">
+  <a href="https://timothycrosley.github.io/wync">Live Demo</a> •
+  <a href="#features">Features</a> •
+  <a href="#getting-started">Getting Started</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#development">Development</a>
+</p>
 
-### `npm start`
+## Overview
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Wynk is a modern, intuitive scheduling solution for team and family coordination. It provides a visual canvas where you can easily create, manage, and share schedules for various scenarios.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Whether you're coordinating your family's weekly activities, managing team shifts, or planning events, Wynk makes it simple to organize and visualize who's doing what and when.
 
-### `npm test`
+## Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Multiple Schedules**: Create different tabs for various scheduling scenarios
+- **Visual Schedule Canvas**: Select activities and apply them to time slots with a simple click-and-paint interface
+- **Customizable Activities**: Create and customize activities with colors for easy recognition
+- **Import/Export Functionality**: Share schedules with others by exporting and importing JSON files
+- **Undo/Redo Support**: Easily revert or reapply changes with keyboard shortcuts
+- **Drag and Drop**: Organize people and rearrange tabs with intuitive drag-and-drop
+- **Responsive Design**: Works on desktop and mobile devices
+- **Local Storage**: Your schedules are automatically saved in your browser
 
-### `npm run build`
+## Getting Started
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+You can start using Wynk immediately by visiting the [live demo](https://timothycrosley.github.io/wync).
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+No account or installation required - just open the application in your browser and begin organizing your schedule.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Usage
 
-### `npm run eject`
+### Basic Workflow
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. **Add People**: Create entries for each person in your schedule
+2. **Create Activities**: Define activities with custom names and colors
+3. **Schedule**: Select an activity from the palette, then click on cells in the grid to assign activities
+4. **Manage Tabs**: Create multiple tabs for different scheduling scenarios
+5. **Save & Share**: Export your schedules to share with others
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Tips
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- Click and drag to quickly assign an activity to multiple time slots
+- Use the "Duplicate Tab" feature to create variations of existing schedules
+- Export your schedules regularly as backups
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Development
 
-## Learn More
+### Prerequisites
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Node.js and npm
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Local Setup
 
-### Code Splitting
+1. Clone the repository:
+   ```
+   git clone https://github.com/timothycrosley/wync.git
+   cd wync
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
-### Analyzing the Bundle Size
+3. Start the development server:
+   ```
+   npm start
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+4. Open [http://localhost:3000](http://localhost:3000) to view the app in development mode.
 
 ### Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+To deploy the application to GitHub Pages:
 
-### `npm run build` fails to minify
+```
+npm run deploy
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+<p align="center">Built with ❤️ using React</p>
